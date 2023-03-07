@@ -1,0 +1,11 @@
+SECRET_KEY = 'very-secret-key'
+
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=0.0.0.0
+DB_PORT=5432
+
+RABBITMQ_USER=rabbit
+RABBITMQ_PASSWORD=rabbit
