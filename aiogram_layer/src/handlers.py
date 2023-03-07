@@ -8,4 +8,4 @@ async def start_page(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.reply("Привет")
+    await message.reply('Привет')

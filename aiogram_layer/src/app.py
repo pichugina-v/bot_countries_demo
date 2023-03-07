@@ -1,8 +1,7 @@
 import logging
 
-from aiogram import Bot, Dispatcher, executor, types
-from .settings import TG_API_TOKEN
-
+from aiogram import Bot, Dispatcher, executor
+from settings import TG_API_TOKEN
 
 logging.basicConfig(level=logging.INFO)
 
