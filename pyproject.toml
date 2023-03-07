@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "bot_countries_demo"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 aiogram = "^2.25.1"
 django = "^4.1.7"
 python-dotenv = "^1.0.0"
