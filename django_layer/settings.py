@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_layer.tg_bot',
+    'django_layer.countries_app',
 ]
 
 MIDDLEWARE = [
