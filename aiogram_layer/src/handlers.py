@@ -2,7 +2,6 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from .app import dp
-from .messages import ABOUT_MESSAGE
 from .keyboards import (
     all_info,
     country_detail,
@@ -10,7 +9,8 @@ from .keyboards import (
     main_menu,
     weather_detail,
 )
-from .states import Form
+from .messages import ABOUT_MESSAGE
+from .states import CountryCityForm, Form
 
 
 @dp.message_handler(commands='start')
@@ -60,21 +60,21 @@ async def process_city_name(message: types.Message):
 
 @dp.callback_query_handler(
     lambda call: call.data == 'weather',
-    state=Form.city_search
+    state=CountryCityForm  # Было: state=Form.city_search
 )
 async def get_weather(callback: types.CallbackQuery):
     """
     This handler will be called when user clicks "Погода" button
     """
     await callback.message.reply(
-        text='Погода в выбранном городе',
+        text='Погода',  # Было: text='Погода в выбранном городе'
         reply_markup=weather_detail
     )
 
 
 @dp.callback_query_handler(
     lambda call: call.data == 'country_info',
-    state=Form.city_search
+    state=CountryCityForm  # Было: state=Form.city_search
 )
 async def get_country_info(callback: types.CallbackQuery):
     """
@@ -88,7 +88,7 @@ async def get_country_info(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(
     lambda call: call.data == 'currency_rate',
-    state=Form.city_search
+    state=CountryCityForm  # Было: state=Form.city_search
 )
 async def get_currency_rate(callback: types.CallbackQuery):
     """
@@ -113,4 +113,23 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.reply(
         text='Выберите, что Вас интересует:',
         reply_markup=main_menu,
+    )
+
+
+@dp.callback_query_handler(lambda call: call.data == 'country')
+async def enter_country_name(callback: types.CallbackQuery):
+    """
+    This handler will be called when user clicks "Подробнее о стране" button
+    """
+    await Form.country_search.set()
+    await callback.message.reply(
+        text='Введите название страны'
+    )
+
+
+@dp.message_handler(state=Form.country_search)
+async def process_country_name(message: types.Message):
+    await message.reply(
+        text=f'Информация о стране {message.text}',
+        reply_markup=country_detail
     )
