@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from .app import dp
+from .messages import ABOUT_MESSAGE
 from .keyboards import (
     all_info,
     country_detail,
@@ -15,11 +16,23 @@ from .states import Form
 @dp.message_handler(commands='start')
 async def start_page(message: types.Message):
     """
-    This handler will be called when user sends `/start` or `/help` command
+    This handler will be called when user sends /start or /help command
     """
     await message.reply(
         text='Привет! Выберите, что Вас интересует:',
         reply_markup=main_menu
+    )
+
+
+@dp.callback_query_handler(lambda c: c.data == 'about')
+async def show_about_page(callback: types.CallbackQuery):
+    """
+    This handler will be called when user choose 'О проекте' in main menu.
+    Shows info about bot's features.
+    """
+    await callback.message.answer(
+        text=ABOUT_MESSAGE,
+        reply_markup=main_menu,
     )
 
 
@@ -99,5 +112,5 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     await state.reset_state(with_data=True)
     await callback.message.reply(
         text='Выберите, что Вас интересует:',
-        reply_markup=main_menu
+        reply_markup=main_menu,
     )
