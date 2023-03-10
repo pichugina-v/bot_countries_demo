@@ -3,11 +3,11 @@ from aiogram.dispatcher import FSMContext
 
 from .app import dp
 from .keyboards import (
-    ALL_INFO,
-    COUNTRY_DETAIL,
-    CURRENCY_RATE_DETAIL,
-    MAIN_MENU,
-    WEATHER_DETAIL,
+    all_info,
+    country_detail,
+    currency_detail,
+    main_menu,
+    weather_detail,
 )
 from .states import Form
 
@@ -19,7 +19,7 @@ async def start_page(message: types.Message):
     """
     await message.reply(
         text='Привет! Выберите, что Вас интересует:',
-        reply_markup=MAIN_MENU
+        reply_markup=main_menu
     )
 
 
@@ -41,7 +41,7 @@ async def process_city_name(message: types.Message):
     """
     await message.reply(
         text=f'Информация о городе {message.text}',
-        reply_markup=ALL_INFO
+        reply_markup=all_info
     )
 
 
@@ -55,7 +55,7 @@ async def get_weather(callback: types.CallbackQuery):
     """
     await callback.message.reply(
         text='Погода в выбранном городе',
-        reply_markup=WEATHER_DETAIL
+        reply_markup=weather_detail
     )
 
 
@@ -69,7 +69,7 @@ async def get_country_info(callback: types.CallbackQuery):
     """
     await callback.message.reply(
         text='Подробнее о стране: ',
-        reply_markup=COUNTRY_DETAIL
+        reply_markup=country_detail
     )
 
 
@@ -83,7 +83,7 @@ async def get_currency_rate(callback: types.CallbackQuery):
     """
     await callback.message.reply(
         text='Подробнее о курсе валюты',
-        reply_markup=CURRENCY_RATE_DETAIL
+        reply_markup=currency_detail
     )
 
 
@@ -99,5 +99,5 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     await state.reset_state(with_data=True)
     await callback.message.reply(
         text='Выберите, что Вас интересует:',
-        reply_markup=MAIN_MENU
+        reply_markup=main_menu
     )
