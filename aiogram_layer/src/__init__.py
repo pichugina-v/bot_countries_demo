@@ -1,4 +1,4 @@
 from . import handlers
 
 
-all = ['handlers']
+__all__ = ['handlers']

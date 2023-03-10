@@ -1,4 +1,6 @@
-SECRET_KEY = 'very-secret-key'
+SECRET_KEY='very-secret-key'
+
+TG_API_TOKEN='tg-api-token'
 
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=postgres
