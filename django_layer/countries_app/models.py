@@ -20,7 +20,8 @@ class City(models.Model):
 
 
 class Country(models.Model):
-    iso_code = models.CharField(max_length=50, primary_key=True, verbose_name=_('ISO code'))
+    iso_code = models.CharField(
+        max_length=50, primary_key=True, verbose_name=_('ISO code'))
     name = models.CharField(max_length=50, unique=True, verbose_name=_('name'))
     capital = models.OneToOneField(
         'City',
@@ -56,7 +57,8 @@ class Language(models.Model):
 
 
 class Currency(models.Model):
-    iso_code = models.CharField(max_length=30, primary_key=True, verbose_name=_('ISO code'))
+    iso_code = models.CharField(
+        max_length=30, primary_key=True, verbose_name=_('ISO code'))
     name = models.CharField(max_length=30, verbose_name=_('name'), unique=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
     country = models.ManyToManyField('Country', related_name='currencies')
