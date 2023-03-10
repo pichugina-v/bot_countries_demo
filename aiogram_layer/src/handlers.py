@@ -2,16 +2,6 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from .app import dp
-from .messages import (
-    ABOUT_MESSAGE,
-    ENTER_CITY,
-    COUNTRY_INFO,
-    START_MESSAGE,
-    RESTART_MESSAGE,
-    WEATHER_DETAIL,
-    COUNTRY_DETAIL,
-    CURRENCY_RATE_DETAIL,
-)
 from .keyboards import (
     all_info,
     country_detail,
@@ -19,7 +9,19 @@ from .keyboards import (
     main_menu,
     weather_detail,
 )
-from .messages import ABOUT_MESSAGE
+from .messages import (
+    ABOUT_MESSAGE,
+    COUNTRY_DETAIL,
+    COUNTRY_INFO,
+    COUNTRY_INFO_NAME,
+    CURRENCY_RATE_DETAIL,
+    ENTER_CITY,
+    ENTER_COUNTRY,
+    RESTART_MESSAGE,
+    START_MESSAGE,
+    WEATHER_DETAIL,
+    WEATHER_DETAIL_COUNTRY,
+)
 from .states import CountryCityForm, Form
 
 
@@ -71,22 +73,25 @@ async def process_city_name(message: types.Message):
 
 @dp.callback_query_handler(
     lambda call: call.data == 'weather',
-    state=CountryCityForm  # Было: state=Form.city_search
+    state=CountryCityForm
 )
-async def get_weather(callback: types.CallbackQuery):
+async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Погода' button.
     Continues the dialog about weather details.
     """
+    detail_text = WEATHER_DETAIL
+    if (await state.get_state()) == 'CountryCityForm:country_search':
+        detail_text = WEATHER_DETAIL_COUNTRY
     await callback.message.reply(
-        text=WEATHER_DETAIL,
+        text=detail_text,
         reply_markup=weather_detail
     )
 
 
 @dp.callback_query_handler(
     lambda call: call.data == 'country_info',
-    state=CountryCityForm  # Было: state=Form.city_search
+    state=CountryCityForm
 )
 async def get_country_info(callback: types.CallbackQuery):
     """
@@ -101,7 +106,7 @@ async def get_country_info(callback: types.CallbackQuery):
 
 @dp.callback_query_handler(
     lambda call: call.data == 'currency_rate',
-    state=CountryCityForm  # Было: state=Form.city_search
+    state=CountryCityForm
 )
 async def get_currency_rate(callback: types.CallbackQuery):
     """
@@ -133,17 +138,20 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda call: call.data == 'country')
 async def enter_country_name(callback: types.CallbackQuery):
     """
-    This handler will be called when user clicks "Подробнее о стране" button
+    This handler will be called when user chooses 'Поиск по стране'.
     """
     await Form.country_search.set()
     await callback.message.reply(
-        text='Введите название страны'
+        text=ENTER_COUNTRY
     )
 
 
 @dp.message_handler(state=Form.country_search)
 async def process_country_name(message: types.Message):
+    """
+    This handler will be called when user inputs country name.
+    """
     await message.reply(
-        text=f'Информация о стране {message.text}',
+        text=COUNTRY_INFO_NAME.format(country=message.text),
         reply_markup=country_detail
     )
