@@ -13,11 +13,20 @@ ABOUT_MESSAGE = '''
 ENTER_CITY = '''
 Введите название городa:
 '''
+ENTER_COUNTRY = '''
+Введите название страны:
+'''
 COUNTRY_INFO = '''
 Информация о стране, где расположен город {city}
 '''
+COUNTRY_INFO_NAME = '''
+Информация о стране {country}
+'''
 WEATHER_DETAIL = '''
 Погода в выбранном городе
+'''
+WEATHER_DETAIL_COUNTRY = '''
+Погода в столице
 '''
 COUNTRY_DETAIL = '''
 Подробнее о стране
