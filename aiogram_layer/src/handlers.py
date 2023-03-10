@@ -2,6 +2,16 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from .app import dp
+from .messages import (
+    ABOUT_MESSAGE,
+    ENTER_CITY,
+    COUNTRY_INFO,
+    START_MESSAGE,
+    RESTART_MESSAGE,
+    WEATHER_DETAIL,
+    COUNTRY_DETAIL,
+    CURRENCY_RATE_DETAIL,
+)
 from .keyboards import (
     all_info,
     country_detail,
@@ -13,13 +23,13 @@ from .messages import ABOUT_MESSAGE
 from .states import CountryCityForm, Form
 
 
-@dp.message_handler(commands='start')
+@dp.message_handler(commands=['start', 'help'])
 async def start_page(message: types.Message):
     """
     This handler will be called when user sends /start or /help command
     """
     await message.reply(
-        text='Привет! Выберите, что Вас интересует:',
+        text=START_MESSAGE,
         reply_markup=main_menu
     )
 
@@ -27,7 +37,7 @@ async def start_page(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data == 'about')
 async def show_about_page(callback: types.CallbackQuery):
     """
-    This handler will be called when user choose 'О проекте' in main menu.
+    This handler will be called when user chooses 'О проекте' in main menu.
     Shows info about bot's features.
     """
     await callback.message.answer(
@@ -39,21 +49,22 @@ async def show_about_page(callback: types.CallbackQuery):
 @dp.callback_query_handler(lambda call: call.data == 'city')
 async def enter_city_name(callback: types.CallbackQuery):
     """
-    This handler will be called when user clicks 'Поиск по городу' button
+    This handler will be called when user chooses 'Поиск по городу' in main menu.
     """
     await Form.city_search.set()
     await callback.message.reply(
-        text='Введите название городa'
+        text=ENTER_CITY
     )
 
 
 @dp.message_handler(state=Form.city_search)
 async def process_city_name(message: types.Message):
     """
-    This handler will be called when user enters city name
+    This handler will be called when user inputs city name.
+    Continues the dialogue about the country where the city is located.
     """
     await message.reply(
-        text=f'Информация о городе {message.text}',
+        text=COUNTRY_INFO.format(city=message.text),
         reply_markup=all_info
     )
 
@@ -64,10 +75,11 @@ async def process_city_name(message: types.Message):
 )
 async def get_weather(callback: types.CallbackQuery):
     """
-    This handler will be called when user clicks "Погода" button
+    This handler will be called when user chooses 'Погода' button.
+    Continues the dialog about weather details.
     """
     await callback.message.reply(
-        text='Погода',  # Было: text='Погода в выбранном городе'
+        text=WEATHER_DETAIL,
         reply_markup=weather_detail
     )
 
@@ -78,10 +90,11 @@ async def get_weather(callback: types.CallbackQuery):
 )
 async def get_country_info(callback: types.CallbackQuery):
     """
-    This handler will be called when user clicks "Подробнее о стране" button
+    This handler will be called when user chooses 'Подробнее о стране' button.
+    Continues the dialog about country details.
     """
     await callback.message.reply(
-        text='Подробнее о стране: ',
+        text=COUNTRY_DETAIL,
         reply_markup=country_detail
     )
 
@@ -92,10 +105,11 @@ async def get_country_info(callback: types.CallbackQuery):
 )
 async def get_currency_rate(callback: types.CallbackQuery):
     """
-    This handler will be called when user clicks "Курс валюты" button
+    This handler will be called when user chooses 'Курс валюты' button.
+    Continues the dialog about currency rate.
     """
     await callback.message.reply(
-        text='Подробнее о курсе валюты',
+        text=CURRENCY_RATE_DETAIL,
         reply_markup=currency_detail
     )
 
@@ -106,12 +120,12 @@ async def get_currency_rate(callback: types.CallbackQuery):
 )
 async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     """
-    This handler will be called when user clicks "К началу" button
+    This handler will be called when user chooses 'К началу' button.
     Resets all states, restarts dialog
     """
     await state.reset_state(with_data=True)
     await callback.message.reply(
-        text='Выберите, что Вас интересует:',
+        text=RESTART_MESSAGE,
         reply_markup=main_menu,
     )
 
