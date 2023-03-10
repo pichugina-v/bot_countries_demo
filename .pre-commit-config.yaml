@@ -31,6 +31,7 @@ repos:
     rev: v2.0.1
     hooks:
     -   id: autopep8
+        args: [--max-line-length=120, --in-place]
 
 # Сканер стилистических ошибок, нарушающие договоренности PEP8
 -   repo: https://github.com/PyCQA/flake8
@@ -45,3 +46,4 @@ repos:
     rev: v0.991
     hooks:
     -   id: mypy
+        exclude: 'migrations'
