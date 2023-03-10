@@ -22,6 +22,7 @@ async def start_page(message: types.Message):
         reply_markup=MAIN_MENU
     )
 
+
 @dp.callback_query_handler(lambda call: call.data == 'city')
 async def enter_city_name(callback: types.CallbackQuery):
     """
@@ -32,6 +33,7 @@ async def enter_city_name(callback: types.CallbackQuery):
         text='Введите название городa'
     )
 
+
 @dp.message_handler(state=Form.city_search)
 async def process_city_name(message: types.Message):
     """
@@ -41,6 +43,7 @@ async def process_city_name(message: types.Message):
         text=f'Информация о городе {message.text}',
         reply_markup=ALL_INFO
     )
+
 
 @dp.callback_query_handler(
     lambda call: call.data == 'weather',
@@ -55,6 +58,7 @@ async def get_weather(callback: types.CallbackQuery):
         reply_markup=WEATHER_DETAIL
     )
 
+
 @dp.callback_query_handler(
     lambda call: call.data == 'country_info',
     state=Form.city_search
@@ -68,6 +72,7 @@ async def get_country_info(callback: types.CallbackQuery):
         reply_markup=COUNTRY_DETAIL
     )
 
+
 @dp.callback_query_handler(
     lambda call: call.data == 'currency_rate',
     state=Form.city_search
@@ -80,6 +85,7 @@ async def get_currency_rate(callback: types.CallbackQuery):
         text='Подробнее о курсе валюты',
         reply_markup=CURRENCY_RATE_DETAIL
     )
+
 
 @dp.callback_query_handler(
     lambda call: call.data == 'to_main_menu',
