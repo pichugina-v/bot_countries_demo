@@ -23,4 +23,3 @@ async def show_about_page(callback: types.CallbackQuery):
         text=ABOUT_MESSAGE,
         reply_markup=main_menu,
     )
-

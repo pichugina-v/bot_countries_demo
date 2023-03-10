@@ -3,7 +3,6 @@ import logging
 from aiogram import executor
 from src.app import dp
 
-
 logging.basicConfig(level=logging.INFO)
 
 
