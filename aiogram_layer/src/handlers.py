@@ -23,6 +23,7 @@ from .messages import (
     WEATHER_DETAIL_COUNTRY,
 )
 from .states import CountryCityForm, Form
+from .callbacks import Callbacks as cb
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -41,11 +42,16 @@ async def start_page(message: types.Message):
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'about')
+@dp.callback_query_handler(lambda c: c.data == cb.about.value)
 async def show_about_page(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'О проекте' in main menu.
     Shows info about bot's features.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+
+    :return: None
     """
     await callback.message.answer(
         text=ABOUT_MESSAGE,
