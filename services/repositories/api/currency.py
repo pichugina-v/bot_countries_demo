@@ -7,6 +7,9 @@ from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
 class CurrencyAPIRepository(BaseAPIRepository):
+    """
+    This class is a repository for making requests in currency API.
+    """
 
     async def get_rate(self, currency_code: CurrenciesCode) -> float:
         """
@@ -18,6 +21,7 @@ class CurrencyAPIRepository(BaseAPIRepository):
         :return: currency rate
         :rtype: float
         """
+
         response = await self._send_request(url='https://www.cbr-xml-daily.ru/daily_json.js')
         if response.status == 200:
             data_cbr = await self._parse_response(response)
@@ -36,6 +40,6 @@ class CurrencyAPIRepository(BaseAPIRepository):
         :return: parsed response
         :rtype: float
         """
-        # data_cbr = await response.json()
+
         data_cbr = json.loads(await response.read())
         return data_cbr

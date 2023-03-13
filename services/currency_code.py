@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class CurrenciesCode(Enum):
+    """
+    Contain all available currencies code for CurrencyAPIRepository
+    """
     AUD = 'AUD'
     AZN = 'AZN'
     GBP = 'GBP'
