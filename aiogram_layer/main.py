@@ -1,8 +1,12 @@
 import logging
+import os
+import sys
 
 from aiogram import executor
-from src.app import dp
 
+from aiogram_layer.src.app import dp
+
+sys.path.append(os.path.join(os.getcwd()))
 logging.basicConfig(level=logging.INFO)
 
 
