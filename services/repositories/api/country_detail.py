@@ -8,7 +8,12 @@ from services.repositories.api.base_api_repository import BaseAPIRepository
 
 @dataclass
 class CountryDetailRepository(BaseAPIRepository):
-    url: str = COUNTRY_INFO
+    """
+    This is a class of a RestCOuntries repository. Provides detailed information about countries
+    by sending request to external API "Restcountries.com".
+    Extends of the :class:`BaseAPIRepository` class.
+    """
+    api_url: str = COUNTRY_INFO
 
     async def get_country_detail(self, country_code: str) -> dict:
         """
