@@ -1,5 +1,5 @@
 SECRET_KEY='very-secret-key'
-
+YANDEX_API_KEY = 'very-secret-key'
 TG_API_TOKEN='tg-api-token'
 
 DB_ENGINE=django.db.backends.postgresql
