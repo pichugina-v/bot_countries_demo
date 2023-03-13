@@ -184,6 +184,11 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
 async def enter_country_name(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'Поиск по стране'.
+
+    :param callback: arg1
+    :type callback: types.CallbackQuery
+
+    :return: None
     """
     await Form.country_search.set()
     await callback.message.reply(
@@ -195,6 +200,11 @@ async def enter_country_name(callback: types.CallbackQuery):
 async def process_country_name(message: types.Message):
     """
     This handler will be called when user inputs country name.
+
+    :param message: arg1
+    :type message: types.Message
+
+    :return: None
     """
     await message.reply(
         text=COUNTRY_INFO_NAME.format(country=message.text),
