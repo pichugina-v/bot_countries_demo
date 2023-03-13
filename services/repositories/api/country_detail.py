@@ -8,7 +8,12 @@ from services.repositories.api.base_api_repository import BaseAPIRepository
 
 @dataclass
 class CountryDetailRepository(BaseAPIRepository):
-    url: str = COUNTRY_INFO
+    """
+    This is a class of a RestCOuntries repository. Provides detailed information about countries
+    by sending request to external API "Restcountries.com".
+    Extends of the :class:`BaseAPIRepository` class.
+    """
+    api_url: str = COUNTRY_INFO
 
     async def get_country_detail(self, country_code: str) -> dict:
         """
@@ -16,7 +21,7 @@ class CountryDetailRepository(BaseAPIRepository):
 
         :param country_code: country iso code (example: "GB", "CA", "RU")
         :type: str
-        
+
         :return: country details
         :rtype: dict
         """
@@ -41,12 +46,12 @@ class CountryDetailRepository(BaseAPIRepository):
         :param response: response from aiohttp
         :type: ClientResponse
 
-        :return: parsed response
-        :rtype: float
+        :return: response content as a json-object
+        :rtype: json
         """
         country_data = await response.json()
         return country_data
 
 
-def get_country_detail_repo():
+def get_country_detail_repository():
     return CountryDetailRepository()
