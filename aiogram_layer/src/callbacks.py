@@ -9,5 +9,3 @@ class Callbacks(Enum):
     weather = 'weather'
     country_info = 'country_info'
     currency_rate = 'currency_rate'
-
-
