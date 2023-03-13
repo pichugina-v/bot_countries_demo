@@ -2,10 +2,9 @@ from dataclasses import dataclass
 
 from aiohttp import ClientResponse
 
-from services.repositories.api.base_api_repository import BaseAPIRepository
 from services.repositories.api.api_settings import WEATHER_API_KEY
 from services.repositories.api.api_urls import WEATHER_INFO_URL
-
+from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
 @dataclass
@@ -39,7 +38,7 @@ class WeatherAPIRepository(BaseAPIRepository):
             current_weather_temp = data_weather.get('main').get('temp')
             current_weather_temp_feels_like = data_weather.get('main').get('feels_like')
             return current_weather_temp, current_weather_temp_feels_like
-            
+
     async def _parse_response(self, response: ClientResponse):
         """
         Converts :class:`ClientResponse` into json-object.
