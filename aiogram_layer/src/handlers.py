@@ -29,6 +29,11 @@ from .states import CountryCityForm, Form
 async def start_page(message: types.Message):
     """
     This handler will be called when user sends /start or /help command
+
+    :param message: message
+    :type messahe: types.Message
+
+    :return: None 
     """
     await message.reply(
         text=START_MESSAGE,
@@ -52,6 +57,11 @@ async def show_about_page(callback: types.CallbackQuery):
 async def enter_city_name(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'Поиск по городу' in main menu.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+     
+    :return: None
     """
     await Form.city_search.set()
     await callback.message.reply(
@@ -64,6 +74,11 @@ async def process_city_name(message: types.Message):
     """
     This handler will be called when user inputs city name.
     Continues the dialogue about the country where the city is located.
+
+    :param message: message
+    :type: types.Message
+
+    :return: None 
     """
     await message.reply(
         text=COUNTRY_INFO.format(city=message.text),
@@ -79,6 +94,13 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Погода' button.
     Continues the dialog about weather details.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+    :param state: state
+    :type state: FSMContext
+
+    :return: None 
     """
     detail_text = WEATHER_DETAIL
     if (await state.get_state()) == 'CountryCityForm:country_search':
@@ -97,6 +119,11 @@ async def get_country_info(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'Подробнее о стране' button.
     Continues the dialog about country details.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+
+    :return: None 
     """
     await callback.message.reply(
         text=COUNTRY_DETAIL,
@@ -112,6 +139,11 @@ async def get_currency_rate(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'Курс валюты' button.
     Continues the dialog about currency rate.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+
+    :return: None 
     """
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL,
@@ -126,7 +158,14 @@ async def get_currency_rate(callback: types.CallbackQuery):
 async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'К началу' button.
-    Resets all states, restarts dialog
+    Resets all states, restarts dialog.
+
+    :param callback: callback function
+    :type callback: types.CallbackQuery
+    :param state: state
+    :type state: FSMContext
+
+    :return: None 
     """
     await state.reset_state(with_data=True)
     await callback.message.reply(
