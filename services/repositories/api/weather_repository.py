@@ -13,9 +13,6 @@ class WeatherAPIRepository(BaseAPIRepository):
     This is a class of a WeatherAPI repository. Provides information about current weather
     by sending request to external API "Openweathermap.org".
     Extends of the :class:`BaseAPIRepository` class.
-
-    :param api_key: api token for Openweathermap.org API connection
-    :type api_key: str
     """
     api_key: str = WEATHER_API_KEY
     api_url: str = WEATHER_INFO_URL
