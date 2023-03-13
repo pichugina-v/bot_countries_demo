@@ -1,15 +1,16 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from .app import dp
-from .keyboards import (
+from aiogram_layer.src.app import dp
+from aiogram_layer.src.callbacks import Callbacks as cb
+from aiogram_layer.src.keyboards import (
     all_info,
     country_detail,
     currency_detail,
     main_menu,
     weather_detail,
 )
-from .messages import (
+from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
     COUNTRY_DETAIL,
     COUNTRY_INFO,
@@ -22,8 +23,7 @@ from .messages import (
     WEATHER_DETAIL,
     WEATHER_DETAIL_COUNTRY,
 )
-from .states import CountryCityForm, Form
-from .callbacks import Callbacks as cb
+from aiogram_layer.src.states import CountryCityForm, Form
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -34,7 +34,7 @@ async def start_page(message: types.Message):
     :param message: message
     :type messahe: types.Message
 
-    :return: None 
+    :return: None
     """
     await message.reply(
         text=START_MESSAGE,
@@ -66,7 +66,7 @@ async def enter_city_name(callback: types.CallbackQuery):
 
     :param callback: callback function
     :type callback: types.CallbackQuery
-     
+
     :return: None
     """
     await Form.city_search.set()
@@ -84,7 +84,7 @@ async def process_city_name(message: types.Message):
     :param message: message
     :type: types.Message
 
-    :return: None 
+    :return: None
     """
     await message.reply(
         text=COUNTRY_INFO.format(city=message.text),
@@ -106,7 +106,7 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     :param state: state
     :type state: FSMContext
 
-    :return: None 
+    :return: None
     """
     detail_text = WEATHER_DETAIL
     if (await state.get_state()) == 'CountryCityForm:country_search':
@@ -129,7 +129,7 @@ async def get_country_info(callback: types.CallbackQuery):
     :param callback: callback function
     :type callback: types.CallbackQuery
 
-    :return: None 
+    :return: None
     """
     await callback.message.reply(
         text=COUNTRY_DETAIL,
@@ -149,7 +149,7 @@ async def get_currency_rate(callback: types.CallbackQuery):
     :param callback: callback function
     :type callback: types.CallbackQuery
 
-    :return: None 
+    :return: None
     """
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL,
@@ -171,7 +171,7 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     :param state: state
     :type state: FSMContext
 
-    :return: None 
+    :return: None
     """
     await state.reset_state(with_data=True)
     await callback.message.reply(
