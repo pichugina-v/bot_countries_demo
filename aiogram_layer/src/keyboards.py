@@ -1,62 +1,40 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
 
-buttons = {
-    'country_search': InlineKeyboardButton(
-        'Поиск по стране', callback_data='country'
-    ),
-    'city_search': InlineKeyboardButton(
-        'Поиск по городу', callback_data='city'
-    ),
-    'about': InlineKeyboardButton(
-        'О проекте', callback_data='about'
-    ),
-    'to_main_menu': InlineKeyboardButton(
-        'К началу', callback_data='to_main_menu'
-    ),
-    'weather': InlineKeyboardButton(
-        'Погода', callback_data='weather'
-    ),
-    'country': InlineKeyboardButton(
-        'Подробнее о стране', callback_data='country_info'
-    ),
-    'currency': InlineKeyboardButton(
-        'Курс валюты', callback_data='currency_rate'
-    )
-}
+from aiogram_layer.src.buttons import Buttons
 
 main_menu = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons['country_search']],
-        [buttons['city_search']],
-        [buttons['about']]
+        [Buttons.country_search.value],
+        [Buttons.city_search.value],
+        [Buttons.about.value],
     ]
 )
 all_info = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons['weather']],
-        [buttons['country']],
-        [buttons['currency']],
-        [buttons['to_main_menu']]
+        [Buttons.weather.value],
+        [Buttons.country.value],
+        [Buttons.currency.value],
+        [Buttons.to_main_menu.value],
     ]
 )
 weather_detail = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons['country']],
-        [buttons['currency']],
-        [buttons['to_main_menu']]
+        [Buttons.country.value],
+        [Buttons.currency.value],
+        [Buttons.to_main_menu.value],
     ]
 )
 country_detail = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons['weather']],
-        [buttons['currency']],
-        [buttons['to_main_menu']]
+        [Buttons.weather.value],
+        [Buttons.currency.value],
+        [Buttons.to_main_menu.value],
     ]
 )
 currency_detail = InlineKeyboardMarkup(
     inline_keyboard=[
-        [buttons['weather']],
-        [buttons['country']],
-        [buttons['to_main_menu']]
+        [Buttons.weather.value],
+        [Buttons.country.value],
+        [Buttons.to_main_menu.value],
     ]
 )
