@@ -11,3 +11,5 @@ DB_PORT=5432
 
 RABBITMQ_USER=rabbit
 RABBITMQ_PASSWORD=rabbit
+
+WEATHER_API_KEY='open_api_key'
