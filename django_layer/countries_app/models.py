@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class City(models.Model):
-    geoname_id = models.PositiveIntegerField(primary_key=True, verbose_name=_('geoname id'))
     name = models.CharField(max_length=50, verbose_name=_('name'))
     country = models.ForeignKey('Country', on_delete=models.PROTECT, verbose_name=_('country'), related_name='cities')
     longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('longitude'))
@@ -23,12 +22,6 @@ class Country(models.Model):
     iso_code = models.CharField(
         max_length=50, primary_key=True, verbose_name=_('ISO code'))
     name = models.CharField(max_length=50, unique=True, verbose_name=_('name'))
-    capital = models.OneToOneField(
-        'City',
-        on_delete=models.PROTECT,
-        verbose_name=_('capital'),
-        related_name='country_capital',
-    )
     population = models.PositiveIntegerField(verbose_name=_('population'))
     area_size = models.PositiveIntegerField(verbose_name=_('area size'))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
@@ -70,3 +63,13 @@ class Currency(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Capital(models.Model):
+    country = models.ForeignKey('Country', on_delete=models.PROTECT, verbose_name=_('country'))
+    city = models.ForeignKey('City', on_delete=models.PROTECT, verbose_name=_('city'))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
+
+    class Meta:
+        verbose_name = _('capital')
+        verbose_name_plural = _('capitals')

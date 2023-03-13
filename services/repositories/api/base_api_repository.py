@@ -1,7 +1,9 @@
+from abc import ABC, abstractmethod
+
 from aiohttp import ClientResponse, ClientSession
 
 
-class BaseAPIRepository:
+class BaseAPIRepository(ABC):
     """
     Abstract class for API repositories
     """
@@ -11,23 +13,20 @@ class BaseAPIRepository:
         """
         Send GET response
 
-        :param url: url address
-        :type: str
+        :param url: API url address
 
         :return: response from API
-        :rtype: ClientResponse
         """
         async with ClientSession() as session:
             resp = await session.get(url)
         return resp
 
+    @abstractmethod
     async def _parse_response(self, response: ClientResponse):
         """
         Abstract function for parsing response
 
         :param response: response from API
-        :type: ClientResponse
 
         :return: None
         """
-        raise NotImplementedError('Response parsing is not implemented')

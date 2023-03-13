@@ -134,3 +134,6 @@ dmypy.json
 vscode
 /vscode
 .vscode_env
+.vscode/
+.vscode_env/
+docker-compose-redis.yaml
