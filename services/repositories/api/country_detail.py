@@ -16,7 +16,7 @@ class CountryDetailRepository(BaseAPIRepository):
 
         :param country_code: country iso code (example: "GB", "CA", "RU")
         :type: str
-        
+
         :return: country details
         :rtype: dict
         """
@@ -41,12 +41,12 @@ class CountryDetailRepository(BaseAPIRepository):
         :param response: response from aiohttp
         :type: ClientResponse
 
-        :return: parsed response
-        :rtype: float
+        :return: response content as a json-object
+        :rtype: json
         """
         country_data = await response.json()
         return country_data
 
 
-def get_country_detail_repo():
+def get_country_detail_repository():
     return CountryDetailRepository()
