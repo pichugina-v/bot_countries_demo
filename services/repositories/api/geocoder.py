@@ -1,39 +1,29 @@
 import json
-import os
 
 from aiohttp import ClientResponse
-from dotenv import load_dotenv
 
+from services.repositories.api.api_settings import YANDEX_API_KEY
 from services.repositories.api.api_urls import GEOCODER_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
-load_dotenv()
-
-YANDEX_API_KEY = os.getenv('YANDEX_API_KEY')
-URL = GEOCODER_URL.format(yandex_api_key=YANDEX_API_KEY)
-
 
 class GeocoderAPIRepository(BaseAPIRepository):
-    async def get_base_info(self, city_or_country_name: str) -> tuple[str, str]:
+    async def get_base_info(self, city_or_country_name: str) -> tuple[float, float, str]:
         """
         Returns country code and city coordinates.
 
         :param city_or_country_name: country or city name
         :type: str
 
-        :return: coordinates and country_code
-        :rtype: Union[str, str]
+        :return: Latitude and Longitude and country code
+        :rtype: tuple[float, float, str]
         """
-        url = URL.format(city_or_country_name=city_or_country_name)
+        url = GEOCODER_URL.format(yandex_api_key=YANDEX_API_KEY,
+                                  city_or_country_name=city_or_country_name)
         response = await self._send_request(url=url)
-        data_yandex_geocoder = await self._parse_response(response)
-        coordinates = data_yandex_geocoder['response']['GeoObjectCollection'][
-            'featureMember'][0]['GeoObject']['Point']['pos']
-        country_code = data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][
-            0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['country_code']
-        return (coordinates, country_code)
+        return await self._parse_response(response)
 
-    async def _parse_response(self, response: ClientResponse) -> dict:
+    async def _parse_response(self, response: ClientResponse) -> tuple[float, float, str]:
         """
         This function parse response.
 
@@ -41,7 +31,14 @@ class GeocoderAPIRepository(BaseAPIRepository):
         :type: ClientResponse
 
         :return: parsed response
-        :rtype: dict
+        :rtype: tuple[float, float, str]
         """
         data_yandex_geocoder = json.loads(await response.read())
-        return data_yandex_geocoder
+        coordinates = data_yandex_geocoder['response']['GeoObjectCollection'][
+            'featureMember'][0]['GeoObject']['Point']['pos']
+        country_code = data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][
+            0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['country_code']
+        coordinates = coordinates.split()
+        lons = float(coordinates[0])
+        lats = float(coordinates[1])
+        return (lons, lats, country_code)
