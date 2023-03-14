@@ -1,14 +1,22 @@
+import asyncio
 import json
+from typing import NamedTuple
 
 from aiohttp import ClientResponse
 
-from services.repositories.api.api_settings import YANDEX_API_KEY
-from services.repositories.api.api_urls import GEOCODER_URL
+from services.repositories.api.api_settings import GEOCODER_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
+class GeocoderDTO(NamedTuple):
+
+    latitude: float
+    longitude: float
+    country_code: str
+
+
 class GeocoderAPIRepository(BaseAPIRepository):
-    async def get_base_info(self, city_or_country_name: str) -> tuple[float, float, str]:
+    async def get_base_info(self, city_or_country_name: str) -> GeocoderDTO:
         """
         Returns country code and city coordinates.
 
@@ -16,12 +24,11 @@ class GeocoderAPIRepository(BaseAPIRepository):
 
         :return: Latitude and Longitude and country code
         """
-        url = GEOCODER_URL.format(yandex_api_key=YANDEX_API_KEY,
-                                  city_or_country_name=city_or_country_name)
+        url = str(GEOCODER_URL).format(city_or_country_name=city_or_country_name)
         response = await self._send_request(url=url)
         return await self._parse_response(response)
 
-    async def _parse_response(self, response: ClientResponse) -> tuple[float, float, str]:
+    async def _parse_response(self, response: ClientResponse) -> GeocoderDTO:
         """
         This function parse response.
 
@@ -37,4 +44,10 @@ class GeocoderAPIRepository(BaseAPIRepository):
         coordinates = coordinates.split()
         lons = float(coordinates[0])
         lats = float(coordinates[1])
-        return (lons, lats, country_code)
+        return GeocoderDTO(latitude=lats, longitude=lons, country_code=country_code)
+
+
+p = GeocoderAPIRepository()
+loop = asyncio.get_event_loop()
+data = loop.run_until_complete(p.get_base_info('москва'))
+print(data)
