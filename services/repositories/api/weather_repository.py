@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
-from pydantic import BaseModel, dataclasses
+from pydantic import BaseModel
 
 from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_API_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
@@ -20,10 +20,10 @@ class WeatherAPIRepository(BaseAPIRepository):
     by sending request to external API "Openweathermap.org".
     Extends of the :class:`BaseAPIRepository` class.
     """
-    api_key: str = WEATHER_API_KEY
-    api_url: str = WEATHER_API_URL
+    api_key: str | None = WEATHER_API_KEY
+    api_url: str | None = WEATHER_API_URL
 
-    async def get_weather(self, latitude: float, longitude: float) -> WeatherData:
+    async def get_weather(self, latitude: float, longitude: float) -> WeatherData | None:
         """
         Returns information about current weather temperature and current weather 'feels like' temperature.
 
@@ -32,7 +32,8 @@ class WeatherAPIRepository(BaseAPIRepository):
 
         :return: a tuple of current weather temperature and current weather 'feels like' temperature in Celsius degrees
         """
-        weather_api_url = self.api_url.format(lat=latitude, long=longitude, api_key=self.api_key)
+        if self.api_key and self.api_url:
+            weather_api_url = self.api_url.format(lat=latitude, long=longitude, api_key=self.api_key)
         response = await self._send_request(url=weather_api_url)
         if response.status == HTTPStatus.OK:
             return await self._parse_response(response)
