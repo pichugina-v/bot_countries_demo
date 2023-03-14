@@ -1,11 +1,16 @@
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=0.0.0.0
+DB_PORT=5432
+
+RABBITMQ_USER=rabbit
+RABBITMQ_PASSWORD=rabbit
+
 SECRET_KEY='very-secret-key'
 YANDEX_API_KEY = 'very-secret-key'
-WEATHER_API_KEY='open_api_key'
 TG_API_TOKEN='tg-api-token'
-
-COUNTRY_INFO = 'https://restcountries.com/v3.1/alpha/{country_code}'
-WEATHER_INFO_URL = 'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={long}&appid={api_key}&units=metric'
-GEOCODER_URL = 'https://geocode-maps.yandex.ru/1.x/?apikey={yandex_api_key}&geocode={city_or_country_name}&format=json&results=1'
 
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=postgres
@@ -16,3 +21,7 @@ DB_PORT=5432
 
 RABBITMQ_USER=rabbit
 RABBITMQ_PASSWORD=rabbit
+
+WEATHER_API_KEY='open_api_key'
+WEATHER_API_URL='open_api_url'
+REST_COUNTRY_API_URL = 'rest-countries-url'
