@@ -13,10 +13,8 @@ class GeocoderAPIRepository(BaseAPIRepository):
         Returns country code and city coordinates.
 
         :param city_or_country_name: country or city name
-        :type: str
 
         :return: Latitude and Longitude and country code
-        :rtype: tuple[float, float, str]
         """
         url = GEOCODER_URL.format(yandex_api_key=YANDEX_API_KEY,
                                   city_or_country_name=city_or_country_name)
@@ -28,10 +26,8 @@ class GeocoderAPIRepository(BaseAPIRepository):
         This function parse response.
 
         :param response: response from aiohttp
-        :type: ClientResponse
 
         :return: parsed response
-        :rtype: tuple[float, float, str]
         """
         data_yandex_geocoder = json.loads(await response.read())
         coordinates = data_yandex_geocoder['response']['GeoObjectCollection'][
