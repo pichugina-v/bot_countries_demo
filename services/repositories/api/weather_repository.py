@@ -4,7 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 from pydantic import BaseModel
 
-from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_API_URL
+from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_INFO_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
@@ -20,8 +20,8 @@ class WeatherAPIRepository(BaseAPIRepository):
     by sending request to external API "Openweathermap.org".
     Extends of the :class:`BaseAPIRepository` class.
     """
-    api_key: str | None = WEATHER_API_KEY
-    api_url: str | None = WEATHER_API_URL
+    api_key: str = WEATHER_API_KEY
+    api_url: str = WEATHER_INFO_URL
 
     async def get_weather(self, latitude: float, longitude: float) -> WeatherData | None:
         """
