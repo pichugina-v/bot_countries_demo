@@ -8,7 +8,6 @@ from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
 class GeocoderDTO(BaseModel):
-
     coordinates: str
     country_code: str
 
@@ -36,5 +35,13 @@ class GeocoderAPIRepository(BaseAPIRepository):
         """
         data_yandex_geocoder = json.loads(await response.read())
 
-        return GeocoderDTO(coordinates=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'],
-                           country_code=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['country_code'])
+        return GeocoderDTO(
+            coordinates=data_yandex_geocoder['response']['GeoObjectCollection'][
+                'featureMember'
+            ][0]['GeoObject']['Point']['pos'],
+            country_code=data_yandex_geocoder['response']['GeoObjectCollection'][
+                'featureMember'
+            ][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address'][
+                'country_code'
+            ],
+        )
