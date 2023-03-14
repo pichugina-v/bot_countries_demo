@@ -73,6 +73,3 @@ class Capital(models.Model):
     class Meta:
         verbose_name = _('capital')
         verbose_name_plural = _('capitals')
-
-    def __str__(self):
-        return self.name
