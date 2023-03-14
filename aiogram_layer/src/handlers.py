@@ -32,7 +32,6 @@ async def start_page(message: types.Message):
     This handler will be called when user sends /start or /help command
 
     :param message: message
-    :type messahe: types.Message
 
     :return: None
     """
@@ -49,7 +48,6 @@ async def show_about_page(callback: types.CallbackQuery):
     Shows info about bot's features.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -65,7 +63,6 @@ async def enter_city_name(callback: types.CallbackQuery):
     This handler will be called when user chooses 'Поиск по городу' in main menu.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -82,7 +79,6 @@ async def process_city_name(message: types.Message):
     Continues the dialogue about the country where the city is located.
 
     :param message: message
-    :type: types.Message
 
     :return: None
     """
@@ -102,9 +98,7 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     Continues the dialog about weather details.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
     :param state: state
-    :type state: FSMContext
 
     :return: None
     """
@@ -127,7 +121,6 @@ async def get_country_info(callback: types.CallbackQuery):
     Continues the dialog about country details.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -147,7 +140,6 @@ async def get_currency_rate(callback: types.CallbackQuery):
     Continues the dialog about currency rate.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -167,9 +159,7 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     Resets all states, restarts dialog.
 
     :param callback: callback function
-    :type callback: types.CallbackQuery
     :param state: state
-    :type state: FSMContext
 
     :return: None
     """
@@ -186,7 +176,6 @@ async def enter_country_name(callback: types.CallbackQuery):
     This handler will be called when user chooses 'Поиск по стране'.
 
     :param callback: arg1
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -202,7 +191,6 @@ async def process_country_name(message: types.Message):
     This handler will be called when user inputs country name.
 
     :param message: arg1
-    :type message: types.Message
 
     :return: None
     """

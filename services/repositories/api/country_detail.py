@@ -15,17 +15,15 @@ class CountryDetailRepository(BaseAPIRepository):
     """
     api_url: str = COUNTRY_INFO
 
-    async def get_country_detail(self, country_code: str) -> dict:
+    async def get_country_detail(self, country_code: str) -> dict | None:
         """
         Return details about country by recieved country code.
 
         :param country_code: country iso code (example: "GB", "CA", "RU")
-        :type: str
 
-        :return: country details
-        :rtype: dict
+        :return: country details or None
         """
-        response = await self._send_request(self.url.format(country_code=country_code))
+        response = await self._send_request(self.api_url.format(country_code=country_code))
         if response.status == 200:
             country_data = await self._parse_response(response)
             return dict(
@@ -38,16 +36,16 @@ class CountryDetailRepository(BaseAPIRepository):
                             for currency in country_data[0]['currencies']},
                 languages=list(language for language in country_data[0]['languages'].values()),
             )
+        else:
+            return None
 
     async def _parse_response(self, response: ClientResponse):
         """
         This function parse response.
 
         :param response: response from aiohttp
-        :type: ClientResponse
 
         :return: response content as a json-object
-        :rtype: json
         """
         country_data = await response.json()
         return country_data

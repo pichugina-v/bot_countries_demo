@@ -12,10 +12,8 @@ class BaseAPIRepository:
         Send GET response
 
         :param url: url address
-        :type: str
 
         :return: response from API
-        :rtype: ClientResponse
         """
         async with ClientSession() as session:
             resp = await session.get(url)
@@ -26,7 +24,6 @@ class BaseAPIRepository:
         Abstract function for parsing response
 
         :param response: response from API
-        :type: ClientResponse
 
         :return: None
         """
