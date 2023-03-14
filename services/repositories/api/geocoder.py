@@ -1,17 +1,15 @@
-import asyncio
 import json
-from typing import NamedTuple
 
 from aiohttp import ClientResponse
+from pydantic import BaseModel
 
 from services.repositories.api.api_settings import GEOCODER_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
-class GeocoderDTO(NamedTuple):
+class GeocoderDTO(BaseModel):
 
-    latitude: float
-    longitude: float
+    coordinates: str
     country_code: str
 
 
@@ -37,17 +35,6 @@ class GeocoderAPIRepository(BaseAPIRepository):
         :return: parsed response
         """
         data_yandex_geocoder = json.loads(await response.read())
-        coordinates = data_yandex_geocoder['response']['GeoObjectCollection'][
-            'featureMember'][0]['GeoObject']['Point']['pos']
-        country_code = data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][
-            0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['country_code']
-        coordinates = coordinates.split()
-        lons = float(coordinates[0])
-        lats = float(coordinates[1])
-        return GeocoderDTO(latitude=lats, longitude=lons, country_code=country_code)
 
-
-p = GeocoderAPIRepository()
-loop = asyncio.get_event_loop()
-data = loop.run_until_complete(p.get_base_info('москва'))
-print(data)
+        return GeocoderDTO(coordinates=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos'],
+                           country_code=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['country_code'])
