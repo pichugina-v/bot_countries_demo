@@ -7,11 +7,11 @@ from cache.cache_settings import REDIS as redis
 
 
 class CacheDTO(NamedTuple):
-    data_bool: bool = None
-    geo_info_data: dict = None
+    data_bool: bool | None = None
+    geo_info_data: dict | None = None
 
 
-class Cache:1
+class Cache:
 
     @staticmethod
     async def exists(coordinates: str) -> CacheDTO:
