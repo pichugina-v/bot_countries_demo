@@ -1,26 +1,53 @@
 # from cache.cache_settings import REDIS as redis
 import asyncio
+from typing import NamedTuple
 
 from cache.cache_settings import LIVE_CACHE_SECONDS as ttl
 from cache.cache_settings import REDIS as redis
 
 
+class CacheDTO(NamedTuple):
+    data_bool: bool = None
+    geo_info_data: dict = None
+
+
 class Cache:
 
     @staticmethod
-    async def exists_(coordinates: str):
-        data = await redis.exists(coordinates)
+    async def exists(coordinates: str) -> CacheDTO:
+        """
+        The function checks for the presence of an entry in the cache.
+
+        :param coordinates
+
+        :return: True or False
+        """
+        data_bool = bool(await redis.exists(coordinates))
         await redis.close()
-        return bool(data)
+        return CacheDTO(data_bool=data_bool)
 
     @staticmethod
-    async def get_(coordinates: str):
+    async def get(coordinates: str) -> CacheDTO:
+        """
+        The function gets an entry from the cache.
+
+        :param coordinates
+
+        :return: information about the city or country
+        """
         geo_info_data = await redis.hgetall(coordinates)
         await redis.close()
-        return geo_info_data
+        return CacheDTO(geo_info_data=geo_info_data)
 
     @staticmethod
-    async def set_or_update(coordinates: str, geo_info_data: dict):
+    async def create_or_update(coordinates: str, geo_info_data: dict) -> None:
+        """
+        Function creates or updates an existing cache entry
+
+        :param coordinates
+
+        :return: None
+        """
         await redis.hmset(coordinates, geo_info_data)
         await redis.expire(coordinates, ttl)
         await redis.close()
@@ -31,15 +58,9 @@ data = {'k': 1, 's': 5}
 
 async def main():
     # return await Cache.exists_('11123')
-    return await asyncio.gather(Cache.set_('1112', data), Cache.get_('1112'))
+    return await asyncio.gather(Cache.create_or_update('1112', data), Cache.get('1112'))
 
 
 if __name__ == '__main__':
-    # data = {'k': 1, 's': 2}
-    # print(data)
-    # x = json.dumps(data)
-    # print(x)
     x = asyncio.run(main())
-
     print(x)
-    # print(json.loads(x.decode('utf-8')))

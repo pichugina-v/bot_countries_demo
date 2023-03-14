@@ -37,7 +37,7 @@ class GeocoderAPIRepository(BaseAPIRepository):
         """
         data_yandex_geocoder = json.loads(await response.read())
 
-        # print(data_yandex_geocoder)
+        print(data_yandex_geocoder)
 
         return GeocoderDTO(
             coordinates=data_yandex_geocoder['response']['GeoObjectCollection'][
@@ -52,4 +52,4 @@ class GeocoderAPIRepository(BaseAPIRepository):
 
 p = GeocoderAPIRepository()
 
-print(asyncio.run(p.get_base_info('москва')))
+print(asyncio.run(p.get_base_info('Октябрьский')))
