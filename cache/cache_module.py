@@ -11,7 +11,7 @@ class CacheDTO(NamedTuple):
     geo_info_data: dict = None
 
 
-class Cache:
+class Cache:11
 
     @staticmethod
     async def exists(coordinates: str) -> CacheDTO:
