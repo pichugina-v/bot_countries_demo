@@ -11,3 +11,5 @@ DB_PORT=5432
 
 RABBITMQ_USER=rabbit
 RABBITMQ_PASSWORD=rabbit
+
+REDIS_URL = 'redis://localhost'
