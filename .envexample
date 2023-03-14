@@ -13,3 +13,4 @@ RABBITMQ_USER=rabbit
 RABBITMQ_PASSWORD=rabbit
 
 REDIS_URL = 'redis://localhost'
+LIVE_CACHE_SECONDS = 36000

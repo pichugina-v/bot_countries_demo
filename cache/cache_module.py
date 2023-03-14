@@ -1,8 +1,6 @@
-# from cache.cache_settings import REDIS as redis
-import asyncio
 from typing import NamedTuple
 
-from cache.cache_settings import LIVE_CACHE_SECONDS as ttl
+from cache.cache_settings import LIVE_CACHE_SECONDS as TTL
 from cache.cache_settings import REDIS as redis
 
 
@@ -49,18 +47,5 @@ class Cache:
         :return: None
         """
         await redis.hmset(coordinates, geo_info_data)
-        await redis.expire(coordinates, ttl)
+        await redis.expire(coordinates, TTL)
         await redis.close()
-
-
-data = {'k': 1, 's': 5}
-
-
-async def main():
-    # return await Cache.exists_('11123')
-    return await asyncio.gather(Cache.create_or_update('1112', data), Cache.get('1112'))
-
-
-if __name__ == '__main__':
-    x = asyncio.run(main())
-    print(x)
