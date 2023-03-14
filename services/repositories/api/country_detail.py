@@ -4,7 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse
 from pydantic import BaseModel
 
-from services.repositories.api.api_settings import REST_COUNTRY_API_URL
+from services.repositories.api.api_settings import COUNTRY_INFO_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
@@ -25,7 +25,7 @@ class CountryDetailRepository(BaseAPIRepository):
     by sending request to external API "Restcountries.com".
     Extends of the :class:`BaseAPIRepository` class.
     """
-    api_url: str | None = REST_COUNTRY_API_URL
+    api_url: str | None = COUNTRY_INFO_URL
 
     async def get_country_detail(self, country_code: str) -> CountryData | None:
         """

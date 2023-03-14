@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
-from pydantic import BaseModel, dataclasses
+from pydantic import BaseModel
 
-from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_API_URL
+from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_INFO_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
@@ -21,9 +21,9 @@ class WeatherAPIRepository(BaseAPIRepository):
     Extends of the :class:`BaseAPIRepository` class.
     """
     api_key: str = WEATHER_API_KEY
-    api_url: str = WEATHER_API_URL
+    api_url: str = WEATHER_INFO_URL
 
-    async def get_weather(self, latitude: float, longitude: float) -> WeatherData:
+    async def get_weather(self, latitude: float, longitude: float) -> WeatherData | None:
         """
         Returns information about current weather temperature and current weather 'feels like' temperature.
 
