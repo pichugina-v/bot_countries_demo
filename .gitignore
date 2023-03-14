@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 #for vscode
+/.vscode
 .vscode
 vscode
 /vscode
