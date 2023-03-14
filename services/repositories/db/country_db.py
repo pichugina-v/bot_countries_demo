@@ -1,4 +1,4 @@
-from django_layer.countries_app.models import Country
+from django_layer.countries_app.models import Capital, City, Country
 from services.repositories.api.country_detail import CountryData
 
 
@@ -50,11 +50,11 @@ class CountryDBRepository:
     #     for language in languages:
     #         await country.languages.aupdate(name=language)
 
-    # async def create_capital(self, country_pk, city_pk):
-    #     country = await Country.objects.aget(iso_code=country_pk)
-    #     city = await City.objects.aget(id=city_pk)
-    #     new_capital = await Capital.objects.acreate(country_id=country.pk, city_id=city.pk)
-    #     return new_capital
+    async def create_capital(self, country_pk, city_pk):
+        country = await Country.objects.aget(iso_code=country_pk)
+        city = await City.objects.aget(id=city_pk)
+        new_capital = await Capital.objects.acreate(country_id=country.pk, city_id=city.pk)
+        return new_capital
 
 
 def get_country_db_repository() -> CountryDBRepository:
