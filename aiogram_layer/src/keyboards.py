@@ -38,3 +38,8 @@ currency_detail = InlineKeyboardMarkup(
         [Buttons.to_main_menu.value],
     ]
 )
+to_main_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [Buttons.to_main_menu.value],
+    ]
+)
