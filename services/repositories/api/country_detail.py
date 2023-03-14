@@ -9,9 +9,12 @@ from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
 class CountryData(BaseModel):
+    iso_code: str
     name_en: str
     name_ru: str
     capital: str
+    capital_longitude: float
+    capital_latitude: float
     area_size: float
     population: int
     currencies: dict[str, str]
@@ -51,9 +54,12 @@ class CountryDetailRepository(BaseAPIRepository):
         :return: parsed response as :class:`CountryData` object
         """
         country_data = await response.json()
+        iso_code = country_data[0]['cca2']
         name_en = country_data[0]['name']['common']
         name_ru = country_data[0]['translations']['rus']['common']
         capital = country_data[0]['capital'][0]
+        capital_longitude = country_data[0]['capitalInfo']['latlng'][1]
+        capital_latitude = country_data[0]['capitalInfo']['latlng'][0]
         area_size = country_data[0]['area']
         population = country_data[0]['population']
         currencies = {
@@ -64,9 +70,12 @@ class CountryDetailRepository(BaseAPIRepository):
             language for language in country_data[0]['languages'].values()
         )
         return CountryData(
+            iso_code=iso_code,
             name_en=name_en,
             name_ru=name_ru,
             capital=capital,
+            capital_latitude=capital_latitude,
+            capital_longitude=capital_longitude,
             area_size=area_size,
             population=population,
             currencies=currencies,
