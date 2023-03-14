@@ -32,7 +32,8 @@ class WeatherAPIRepository(BaseAPIRepository):
 
         :return: a tuple of current weather temperature and current weather 'feels like' temperature in Celsius degrees
         """
-        weather_api_url = self.api_url.format(lat=latitude, long=longitude, api_key=self.api_key)
+        if self.api_key and self.api_url:
+            weather_api_url = self.api_url.format(lat=latitude, long=longitude, api_key=self.api_key)
         response = await self._send_request(url=weather_api_url)
         if response.status == HTTPStatus.OK:
             return await self._parse_response(response)

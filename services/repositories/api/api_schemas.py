@@ -13,3 +13,16 @@ class CurrencySchema(BaseModel):
 
 class CurrenciesSchema(BaseModel):
     currencies: list[CurrencySchema]
+
+
+class CountrySchema(BaseModel):
+    iso_code: str
+    name_en: str
+    name_ru: str
+    capital: str
+    capital_longitude: float
+    capital_latitude: float
+    area_size: float
+    population: int
+    currencies: dict[str, str]
+    languages: list[str]
