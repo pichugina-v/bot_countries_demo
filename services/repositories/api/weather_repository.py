@@ -13,9 +13,6 @@ class WeatherAPIRepository(BaseAPIRepository):
     This is a class of a WeatherAPI repository. Provides information about current weather
     by sending request to external API "Openweathermap.org".
     Extends of the :class:`BaseAPIRepository` class.
-
-    :param api_key: api token for Openweathermap.org API connection
-    :type api_key: str
     """
     api_key: str = WEATHER_API_KEY
     api_url: str = WEATHER_INFO_URL
@@ -31,7 +28,7 @@ class WeatherAPIRepository(BaseAPIRepository):
         :return: a tuple of current weather temperature and current weather 'feels like' temperature in Celsius degrees
         :rtype: tuple
         """
-        weather_api_url = self.api_url.format(lat=latitude, lon=longitude, api_key=self.api_key)
+        weather_api_url = self.api_url.format(lat=latitude, long=longitude, api_key=self.api_key)
         response = await self._send_request(url=weather_api_url)
         if response.status == 200:
             data_weather = await self._parse_response(response)
