@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, dataclasses
 
 from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_API_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
@@ -47,12 +47,13 @@ class WeatherAPIRepository(BaseAPIRepository):
         :return: parsed response as a :class:`WeatherData` object
         """
         data_weather = await response.json()
-        current_weather_temp = data_weather['main']['temp']
-        current_weather_temp_feels_like = data_weather['main']['feels_like']
-        return WeatherData(current_weather_temp, current_weather_temp_feels_like)
+        return WeatherData(
+            current_weather_temp=data_weather['main']['temp'],
+            current_weather_temp_feels_like=data_weather['main']['feels_like'],
+        )
 
 
-def get_weather_repository():
+def get_weather_repository() -> WeatherAPIRepository:
     """
     Returns object of :class:`WeatherAPIRepository` class
 
