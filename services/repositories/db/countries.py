@@ -42,9 +42,8 @@ class CountryDBRepository:
             population=data.population
         )
         country = await self.get_by_iso_code(iso_code)
-        if country:
-            await self._update_languages(data.languages, country)
-            await self._update_currencies(data.currencies, country)
+        await self._update_languages(data.languages, country)
+        await self._update_currencies(data.currencies, country)
         return country
 
     async def get_by_iso_code(self, iso_code: str) -> Country | None:
