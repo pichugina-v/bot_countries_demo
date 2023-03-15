@@ -5,6 +5,9 @@ from django_layer.countries_app.models import Capital, City, Country, Currency, 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
+    """
+    City model class for django admin site
+    """
     list_display = ('id', 'name', 'country', 'longitude', 'latitude', 'updated_at')
     search_fields = ['name', 'country__name']
     list_filter = (
@@ -15,6 +18,9 @@ class CityAdmin(admin.ModelAdmin):
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
+    """
+    Country model class for django admin site
+    """
     list_display = ('iso_code', 'name', 'population', 'area_size', 'updated_at')
     search_fields = ['iso_code', 'name']
     list_filter = (('updated_at', admin.DateFieldListFilter),)
@@ -22,6 +28,9 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(Capital)
 class CapitalAdmin(admin.ModelAdmin):
+    """
+    Capital model class for django admin site
+    """
     list_display = ('id', 'country', 'city', 'updated_at')
     search_fields = ['country__name', 'city__name']
     list_filter = (
@@ -33,6 +42,9 @@ class CapitalAdmin(admin.ModelAdmin):
 
 @admin.register(Language)
 class LanguageAdmin(admin.ModelAdmin):
+    """
+    Language model class for django admin site
+    """
     list_display = ('id', 'name', 'countries', 'updated_at')
     search_fields = ['name', 'country__name']
     list_filter = (
@@ -40,12 +52,20 @@ class LanguageAdmin(admin.ModelAdmin):
         ('updated_at', admin.DateFieldListFilter),
     )
 
-    def countries(self, obj):
+    def countries(self, obj: Language):
+        """
+        Method for `ManyToMany` related countries display in `list_display`
+
+        :return: list of related country entities
+        """
         return [c.name for c in obj.country.all()]
 
 
 @admin.register(Currency)
 class CurrencyAdmin(admin.ModelAdmin):
+    """
+    Currency model class for django admin site
+    """
     list_display = ('iso_code', 'name', 'countries', 'updated_at')
     search_fields = ['iso_code', 'name', 'country__name']
     list_filter = (
@@ -53,5 +73,10 @@ class CurrencyAdmin(admin.ModelAdmin):
         ('updated_at', admin.DateFieldListFilter),
     )
 
-    def countries(self, obj):
+    def countries(self, obj: Currency):
+        """
+        Method for `ManyToMany` related countries display in `list_display`
+
+        :return: list of related country entities
+        """
         return [c.name for c in obj.country.all()]
