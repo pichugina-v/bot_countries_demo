@@ -26,3 +26,15 @@ class CountrySchema(BaseModel):
     population: int
     currencies: dict[str, str]
     languages: list[str]
+
+
+class WeatherSchema(BaseModel):
+    current_weather_temp: float
+    current_weather_temp_feels_like: float
+
+
+class CitySchema(BaseModel):
+    name: str
+    country_code: str
+    longitude: float
+    latitude: float
