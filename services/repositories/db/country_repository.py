@@ -6,16 +6,16 @@ from services.repositories.api.country_detail import CountrySchema
 
 class CountryDBRepository:
     """
-    This is a class of a Country Database repository. Provides methods for working with the database for countries.
+    This is a class of a Country Database repository. Provides CRUD operations for Country entity.
     Supported methods: create, update, get_by_iso_code, get_by_name, create_capital.
     """
     async def create(self, data: CountrySchema) -> Country:
         """
-        Creates new country in database.
+        Create a country record in Country table.
 
-        :param data: :class:`CountrySchema` object
+        :param data: new country attributed as :class:`CountrySchema` object.
 
-        :return: Country object
+        :return: created country record from Country table
         """
         new_country = await Country.objects.acreate(
             iso_code=data.iso_code,
@@ -29,14 +29,14 @@ class CountryDBRepository:
 
     async def update(self, iso_code: str, data: CountrySchema) -> Country:
         """
-        Update existing country in database.
+        Update a country record in Country table.
 
-        :param iso_code: country iso code (example: "GB", "CA", "RU")
-        :param data: :class:`CountrySchema` object
+        :param iso_code: country database identificator
+        :param data: city attributes to update as :class:`CountrySchema` object
 
-        :return: Country object
+        :return: created country record from Country table
         """
-        updated_country = await Country.objects.filter(pk=iso_code).aupdate(
+        country = await Country.objects.filter(pk=iso_code).aupdate(
             name=data.name_en,
             area_size=data.area_size,
             population=data.population
@@ -45,15 +45,16 @@ class CountryDBRepository:
         if country:
             await self._update_languages(data.languages, country)
             await self._update_currencies(data.currencies, country)
-        return updated_country
+        return country
 
     async def get_by_iso_code(self, iso_code: str) -> Country | None:
         """
-        Returns country by iso_code.
+        Looking for country record with requested iso_code.
+        Returns a country record from Country table or None, if not found.
 
-        :param iso_code: country iso code (example: "GB", "CA", "RU")
+        :param iso_code: country database identificator
 
-        :return: Country object or None
+        :return: country record from Country table or None
         """
         try:
             country = await Country.objects.aget(pk=iso_code)
@@ -63,11 +64,12 @@ class CountryDBRepository:
 
     async def get_by_name(self, name: str) -> Country | None:
         """
-        Return country by country name.
+        Looking for country record with requested name.
+        Returns a country record from Country table or None, if not found.
 
-        :param iso_code: country iso code (example: "GB", "CA", "RU")
+        :param name: country name (example: "GB", "CA", "RU")
 
-        :return: Country object or None
+        :return: country record from Country table or None
         """
         try:
             country = await Country.objects.aget(name=name)
@@ -78,7 +80,7 @@ class CountryDBRepository:
     @staticmethod
     async def _set_languages(languages: list, country: Country) -> None:
         """
-        Create new languages for concrete country in database.
+        Create new languages for concrete country in database or sets existing language for country.
 
         :param languages: list of languages (example: ["English", "French"])
         :param country: Country object
@@ -95,7 +97,7 @@ class CountryDBRepository:
     @staticmethod
     async def _set_currencies(currencies: dict, country: Country) -> None:
         """
-        Create new currencies for concrete country in database.
+        Create new currencies for concrete country in database or sets existing currencies for country.
 
         :param currencies: dict of currencies (example: {"CAN", "Canadian dollar"})
         :param country: Country object
@@ -143,10 +145,10 @@ class CountryDBRepository:
 
     async def create_capital(self, country_pk, city_pk) -> Capital:
         """
-        Create new catital in database.
+        Create a capital record in Capital table.
 
-        :param country_pk: country iso_code (primary key)
-        :param city_pk: city id (primary key)
+        :param country_pk: country database identificator
+        :param city_pk: city database identificator
 
         :return: None
         """
