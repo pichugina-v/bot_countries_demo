@@ -2,12 +2,14 @@ from asgiref.sync import sync_to_async
 
 from django_layer.countries_app.models import Capital, City, Country, Currency, Language
 from services.repositories.api.country_detail import CountrySchema
+from services.repositories.db.base_db_repository import BaseDBRepository
 
 
-class CountryDBRepository:
+class CountryDBRepository(BaseDBRepository):
     """
     This is a class of a Country Database repository. Provides CRUD operations for Country entity.
     Supported methods: create, update, get_by_pk, get_by_name, create_capital.
+    Extends of the :class:`BaseDBRepository` class.
     """
     async def create(self, data: CountrySchema) -> Country:
         """
