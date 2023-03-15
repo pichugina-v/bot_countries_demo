@@ -2,7 +2,7 @@ from django_layer.countries_app.models import City, Country
 from services.repositories.api.api_schemas import CitySchema
 
 
-class CitiesRerpository:
+class CityBDRerpository:
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
     """
@@ -27,7 +27,7 @@ class CitiesRerpository:
         Looking for city record with requested name.
         Returns a city record from City table.
 
-        :param city_id: city database identificator
+        :param city_name: city database identificator
 
         :return: city record from City table.
         """
@@ -58,7 +58,7 @@ class CitiesRerpository:
         Update a city record in City table
 
         :param city_id: city database identificator
-        :param data: city attributes to update
+        :param new_name: new city name to update
 
         :return: updated city record from City table
         """
@@ -67,10 +67,10 @@ class CitiesRerpository:
         return updated_city
 
 
-def get_cities_repository() -> CitiesRerpository:
+def get_cities_repository() -> CityBDRerpository:
     """
     Returns object of :class:`CitiesRerpository` class
 
     return: :class:`CitiesRerpository` object
     """
-    return CitiesRerpository()
+    return CityBDRerpository()
