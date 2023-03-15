@@ -12,8 +12,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     env_file:
       - .env
-    networks:
-      - app_network
     expose:
       - 5432
     ports:
@@ -29,8 +27,6 @@ services:
     image: redis:latest
     env_file:
       - .env
-    networks:
-      - app_network
     expose:
       - 6379
     ports:
@@ -49,8 +45,6 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     env_file:
       - .env
-    networks:
-      - app_network
     expose:
       - 5672
       - 15672
@@ -65,7 +59,3 @@ services:
 
 volumes:
   psql:
-
-networks:
-  app_network:
-    name: app_network

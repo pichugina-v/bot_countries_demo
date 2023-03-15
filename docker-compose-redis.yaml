@@ -19,6 +19,30 @@ services:
       timeout: 5s
       retries: 10
 
+  app_celery:
+    container_name: app_celery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A elink worker
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - redis_db
+
+  app_celery_beat:
+    container_name: app_celery_beat
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A elink beat
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - redis_db
+
 networks:
   app_network:
     name: app_network
