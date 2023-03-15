@@ -2,20 +2,10 @@ from dataclasses import dataclass
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
-from pydantic import BaseModel
 
+from services.repositories.api.api_schemas import CountrySchema
 from services.repositories.api.api_settings import COUNTRY_INFO_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
-
-
-class CountryData(BaseModel):
-    name_en: str
-    name_ru: str
-    capital: str
-    area_size: float
-    population: int
-    currencies: dict[str, str]
-    languages: list[str]
 
 
 @dataclass
@@ -27,13 +17,13 @@ class CountryDetailRepository(BaseAPIRepository):
     """
     api_url: str | None = COUNTRY_INFO_URL
 
-    async def get_country_detail(self, country_code: str) -> CountryData | None:
+    async def get_country_detail(self, country_code: str) -> CountrySchema | None:
         """
         Return details about country by recieved country code.
 
         :param country_code: country iso code (example: "GB", "CA", "RU")
 
-        :return: country details as :class:`CountryData` object or None
+        :return: country details as :class:`CountrySchema` object or None
         """
         if self.api_url:
             response = await self._send_request(self.api_url.format(country_code=country_code))
@@ -42,31 +32,37 @@ class CountryDetailRepository(BaseAPIRepository):
         else:
             return None
 
-    async def _parse_response(self, response: ClientResponse) -> CountryData:
+    async def _parse_response(self, response: ClientResponse) -> CountrySchema:
         """
         This function parse response.
 
         :param response: response from aiohttp
 
-        :return: parsed response as :class:`CountryData` object
+        :return: parsed response as :class:`CountrySchema` object
         """
-        country_data = await response.json()
-        name_en = country_data[0]['name']['common']
-        name_ru = country_data[0]['translations']['rus']['common']
-        capital = country_data[0]['capital'][0]
-        area_size = country_data[0]['area']
-        population = country_data[0]['population']
+        country_data = (await response.json())[0]
+        iso_code = country_data['cca2']
+        name_en = country_data['name']['common']
+        name_ru = country_data['translations']['rus']['common']
+        capital = country_data['capital'][0]
+        capital_longitude = country_data['capitalInfo']['latlng'][1]
+        capital_latitude = country_data['capitalInfo']['latlng'][0]
+        area_size = country_data['area']
+        population = country_data['population']
         currencies = {
-            currency: country_data[0]['currencies'][currency]['name']
-            for currency in country_data[0]['currencies']
+            currency: country_data['currencies'][currency]['name']
+            for currency in country_data['currencies']
         }
         languages = list(
-            language for language in country_data[0]['languages'].values()
+            language for language in country_data['languages'].values()
         )
-        return CountryData(
+        return CountrySchema(
+            iso_code=iso_code,
             name_en=name_en,
             name_ru=name_ru,
             capital=capital,
+            capital_latitude=capital_latitude,
+            capital_longitude=capital_longitude,
             area_size=area_size,
             population=population,
             currencies=currencies,
