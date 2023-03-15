@@ -2,15 +2,10 @@ from dataclasses import dataclass
 from http import HTTPStatus
 
 from aiohttp import ClientResponse
-from pydantic import BaseModel
 
+from services.repositories.api.api_schemas import WeatherSchema
 from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_INFO_URL
 from services.repositories.api.base_api_repository import BaseAPIRepository
-
-
-class WeatherData(BaseModel):
-    current_weather_temp: float
-    current_weather_temp_feels_like: float
 
 
 @dataclass
@@ -23,7 +18,7 @@ class WeatherAPIRepository(BaseAPIRepository):
     api_key: str = WEATHER_API_KEY
     api_url: str = WEATHER_INFO_URL
 
-    async def get_weather(self, latitude: float, longitude: float) -> WeatherData | None:
+    async def get_weather(self, latitude: float, longitude: float) -> WeatherSchema | None:
         """
         Returns information about current weather temperature and current weather 'feels like' temperature.
 
@@ -39,7 +34,7 @@ class WeatherAPIRepository(BaseAPIRepository):
             return await self._parse_response(response)
         return None
 
-    async def _parse_response(self, response: ClientResponse) -> WeatherData:
+    async def _parse_response(self, response: ClientResponse) -> WeatherSchema:
         """
         Converts :class:`ClientResponse` into json-object.
 
@@ -48,7 +43,7 @@ class WeatherAPIRepository(BaseAPIRepository):
         :return: parsed response as a :class:`WeatherData` object
         """
         data_weather = await response.json()
-        return WeatherData(
+        return WeatherSchema(
             current_weather_temp=data_weather['main']['temp'],
             current_weather_temp_feels_like=data_weather['main']['feels_like'],
         )
