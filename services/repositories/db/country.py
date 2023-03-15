@@ -7,22 +7,25 @@ from services.repositories.api.country_detail import CountrySchema
 class CountryDBRepository:
     """
     This is a class of a Country Database repository. Provides CRUD operations for Country entity.
-    Supported methods: create, update, get_by_iso_code, get_by_name, create_capital.
+    Supported methods: create, update, get_by_pk, get_by_name, create_capital.
     """
     async def create(self, data: CountrySchema) -> Country:
         """
         Create a country record in Country table.
 
-        :param data: new country attributed as :class:`CountrySchema` object.
+        :param data: new country attributed as :class:`CountrySchema` object
 
         :return: created country record from Country table
         """
         new_country = await Country.objects.acreate(
             iso_code=data.iso_code,
-            name=data.name_en,
+            name_en=data.name_en,
+            name_ru=data.name_ru,
             area_size=data.area_size,
             population=data.population
         )
+        city = await self._create_capital_city(data)
+        await self._create_capital(data.iso_code, city.id)
         await self._set_languages(data.languages, new_country)
         await self._set_currencies(data.currencies, new_country)
         return new_country
@@ -37,16 +40,17 @@ class CountryDBRepository:
         :return: created country record from Country table
         """
         country = await Country.objects.filter(pk=iso_code).aupdate(
-            name=data.name_en,
+            name_en=data.name_en,
+            name_ru=data.name_ru,
             area_size=data.area_size,
             population=data.population
         )
-        country = await self.get_by_iso_code(iso_code)
+        country = await self.get_by_pk(iso_code)
         await self._update_languages(data.languages, country)
         await self._update_currencies(data.currencies, country)
         return country
 
-    async def get_by_iso_code(self, iso_code: str) -> Country | None:
+    async def get_by_pk(self, iso_code: str) -> Country | None:
         """
         Looking for country record with requested iso_code.
         Returns a country record from Country table or None, if not found.
@@ -66,12 +70,12 @@ class CountryDBRepository:
         Looking for country record with requested name.
         Returns a country record from Country table or None, if not found.
 
-        :param name: country name (example: "GB", "CA", "RU")
+        :param name: country name in russian
 
         :return: country record from Country table or None
         """
         try:
-            country = await Country.objects.aget(name=name)
+            country = await Country.objects.aget(name_ru=name)
             return country
         except Country.DoesNotExist:
             return None
@@ -142,7 +146,8 @@ class CountryDBRepository:
         for iso_code, currency_name in currencies.items():
             await country.currencies.acreate(iso_code=iso_code, name=currency_name)
 
-    async def create_capital(self, country_pk, city_pk) -> Capital:
+    @staticmethod
+    async def _create_capital(country_pk, city_pk) -> Capital:
         """
         Create a capital record in Capital table.
 
@@ -151,10 +156,40 @@ class CountryDBRepository:
 
         :return: None
         """
-        country = await Country.objects.aget(iso_code=country_pk)
-        city = await City.objects.aget(id=city_pk)
-        new_capital = await Capital.objects.acreate(country_id=country.pk, city_id=city.pk)
+        new_capital = await Capital.objects.acreate(country_id=country_pk, city_id=city_pk)
         return new_capital
+
+    @staticmethod
+    async def _create_capital_city(data: CountrySchema):
+        """
+        Create a capital city record in City table
+
+        :param data: new country attributed as :class:`CountrySchema` object
+
+        :return: created city record from City table
+        """
+        new_city = await City.objects.acreate(
+            name=data.capital,
+            longitude=data.capital_longitude,
+            latitude=data.capital_latitude,
+            country=await Country.objects.aget(iso_code=data.iso_code)
+        )
+        return new_city
+
+    async def get_city_by_country_pk(self, country_pk) -> Capital | None:
+        """
+        Looking for capital record with requested country pk.
+        Returns a capital record from Capital table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: capital record from Capital table or None
+        """
+        try:
+            city = await City.objects.aget(country_id=country_pk)
+            return city
+        except City.DoesNotExist:
+            return None
 
 
 def get_country_db_repository() -> CountryDBRepository:
