@@ -9,14 +9,6 @@ main_menu = InlineKeyboardMarkup(
         [Buttons.about.value],
     ]
 )
-all_info = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [Buttons.weather.value],
-        [Buttons.country.value],
-        [Buttons.currency.value],
-        [Buttons.to_main_menu.value],
-    ]
-)
 weather_detail = InlineKeyboardMarkup(
     inline_keyboard=[
         [Buttons.country.value],

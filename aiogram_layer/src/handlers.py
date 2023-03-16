@@ -4,7 +4,6 @@ from aiogram.dispatcher import FSMContext
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
 from aiogram_layer.src.keyboards import (
-    all_info,
     country_detail,
     currency_detail,
     main_menu,
@@ -101,11 +100,9 @@ async def process_city_name(message: types.Message):
 
     :return: None
     """
-    # s = CityService()
-    # city = await s.get_city(name=message.text)
     await message.reply(
         text=COUNTRY_INFO.format(city=message.text),
-        reply_markup=all_info
+        reply_markup=country_detail
     )
 
 
