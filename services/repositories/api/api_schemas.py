@@ -20,8 +20,7 @@ class CountrySchema(BaseModel):
     Pydantic schema for CountryAPIRepository. Using for parsing response from CountryAPI.
     """
     iso_code: str
-    name_en: str
-    name_ru: str
+    name: str
     capital: str
     capital_longitude: float
     capital_latitude: float

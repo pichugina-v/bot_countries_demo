@@ -30,7 +30,7 @@ class CountryDBRepository(BaseDBRepository):
         """
         new_country = await Country.objects.acreate(
             iso_code=data.iso_code,
-            name=data.name_ru,
+            name=data.name,
             area_size=data.area_size,
             population=data.population
         )
