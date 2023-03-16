@@ -5,7 +5,11 @@ from pydantic import BaseModel
 
 from cache.cache_module import Cache, CacheDTO
 from django_layer.countries_app.models import Country
-from services.repositories.api.api_schemas import CurrencySchema, WeatherSchema
+from services.repositories.api.api_schemas import (
+    CountrySchema,
+    CurrencySchema,
+    WeatherSchema,
+)
 from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
@@ -47,8 +51,21 @@ class CountryService:
         if db_country is None:
             db_country = await self.crud.get_by_pk(country_info.country_code)
             if db_country is None:
-                country = await self.countries_repo.get_country_detail(country_info.country_code)
-                db_country = await self.crud.create(country)
+                # country = await self.countries_repo.get_country_detail(country_info.country_code)
+                country = CountrySchema(
+                    iso_code='RU',
+                    name_en='Russia',
+                    name_ru='Россия',
+                    capital='Moscow',
+                    capital_longitude=37.61,
+                    capital_latitude=55.75,
+                    area_size=17098246.0,
+                    population=1234567,
+                    currencies={'EUR': 'Euro', 'USD': 'Dollar'},
+                    languages=['Russian']
+                )
+                if country:
+                    db_country = await self.crud.create(country)
         return db_country
 
     async def _get_db_country(self, name: str) -> Country | None:

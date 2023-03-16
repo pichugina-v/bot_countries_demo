@@ -171,11 +171,13 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
 
     :return: None
     """
-    # async with state.proxy() as data:
-    #     currency_rates = await CountryService().get_currecny(data['currencies'])
-    #     print(currency_rates)
+    currency_details = ''
+    async with state.proxy() as data:
+        for currency in data['currencies']:
+            currency_details += ' ' + str(currency.name) + '-' + str(currency.value)
+            print(currency_details)
     await callback.message.reply(
-        text=CURRENCY_RATE_DETAIL,
+        text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
         reply_markup=currency_detail
     )
 
@@ -251,11 +253,10 @@ async def process_country_name(message: types.Message, state: FSMContext):
         data['currencies'] = currencies
     await message.reply(
         text=COUNTRY_INFO_NAME.format(
-            name_ru=country_info.name_ru,
-            name_en=country_info.name_en,
+            name=country_info.name,
             area_size=country_info.area_size,
             population=country_info.population,
-            languages=' '.join(str(language) for language in languages.languages),
+            languages=', '.join(str(language) for language in languages.languages),
             currencies=', '.join(str(currency.name) for currency in currencies)
         ),
         reply_markup=country_detail

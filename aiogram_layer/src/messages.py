@@ -21,7 +21,7 @@ COUNTRY_INFO = '''
 '''
 COUNTRY_INFO_NAME = '''
 Информация о стране.
-Название: {name_ru}, назавние на английском: {name_en}.
+Название: {name}.
 Площадь страны {area_size}, население составляет {population}.
 Государственный язык - {languages}.
 Государственная валюта - {currencies}.
@@ -37,7 +37,7 @@ COUNTRY_DETAIL = '''
 Подробнее о стране
 '''
 CURRENCY_RATE_DETAIL = '''
-Курс валюты в стране
+Курс валюты к RUB - {currency_details}
 '''
 INVALID_CITY = '''
 Неверное название города. Попробуйте еще раз
