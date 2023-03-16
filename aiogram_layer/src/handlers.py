@@ -101,6 +101,8 @@ async def process_city_name(message: types.Message):
 
     :return: None
     """
+    # s = CityService()
+    # city = await s.get_city(name=message.text)
     await message.reply(
         text=COUNTRY_INFO.format(city=message.text),
         reply_markup=all_info
