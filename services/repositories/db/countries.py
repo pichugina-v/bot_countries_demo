@@ -1,8 +1,17 @@
 from asgiref.sync import sync_to_async
+from pydantic import BaseModel
 
 from django_layer.countries_app.models import Capital, City, Country, Currency, Language
 from services.repositories.api.country_detail import CountrySchema
 from services.repositories.db.base_db_repository import BaseDBRepository
+
+
+class CurrencyDBSchema(BaseModel):
+    currency_codes: list[str]
+
+
+class LanguageDBSchema(BaseModel):
+    languages: list[str]
 
 
 class CountryDBRepository(BaseDBRepository):
@@ -192,6 +201,40 @@ class CountryDBRepository(BaseDBRepository):
             return city
         except City.DoesNotExist:
             return None
+
+    async def get_country_currency(self, country_pk: str) -> CurrencyDBSchema | None:
+        """
+        Looking for all currency records with requested country pk.
+        Returns a list of currency names from Currency table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: list of currency names from Currency table or None
+        """
+        country = await self.get_by_pk(country_pk)
+        currencies = []
+        if country:
+            async for currency in await sync_to_async(country.currencies.all)():
+                currencies.append(currency.iso_code)
+            return CurrencyDBSchema(currency_codes=currencies)
+        return None
+
+    async def get_country_language(self, country_pk: str) -> LanguageDBSchema | None:
+        """
+        Looking for all language records with requested country pk.
+        Returns a list of languages names from Language table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: list of language names from Language table or None
+        """
+        country = await self.get_by_pk(country_pk)
+        languages = []
+        if country:
+            async for language in await sync_to_async(country.languages.all)():
+                languages.append(language.name)
+            return LanguageDBSchema(languages=languages)
+        return None
 
 
 def get_country_db_repository() -> CountryDBRepository:

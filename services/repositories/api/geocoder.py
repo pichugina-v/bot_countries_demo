@@ -56,4 +56,4 @@ class GeocoderAPIRepository(BaseAPIRepository):
 
 p = GeocoderAPIRepository()
 
-print(asyncio.run(p.get_base_info('Октябрьский')))
+# print(asyncio.run(p.get_base_info('Октябрьский')))

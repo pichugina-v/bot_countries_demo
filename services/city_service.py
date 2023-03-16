@@ -1,7 +1,7 @@
 from cache.cache_module import Cache, CacheDTO
 from django_layer.countries_app.models import City
 from services.repositories.api.geocoder import GeocoderAPIRepository
-from services.repositories.db.city import CityBDRerpository
+from services.repositories.db.cities import CityBDRerpository
 
 
 class CityService:
