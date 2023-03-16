@@ -12,11 +12,14 @@ DB_PORT=5432
 RABBITMQ_USER=rabbit
 RABBITMQ_PASSWORD=rabbit
 
+
 REDIS_URL = 'redis://localhost'
 LIVE_CACHE_SECONDS = 36000
 
 WEATHER_API_KEY='open_api_key'
 WEATHER_API_URL='open_api_url'
+GEOCODER_URL = 'geocoder-url'
 COUNTRY_INFO_URL = 'rest-countries-url'
 WEATHER_INFO_URL = 'weather-api-url'
 CURRENCY_INFO_URL = 'currency-api-url'
+>>>>>>>>> Temporary merge branch 2
