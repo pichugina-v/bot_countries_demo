@@ -40,8 +40,6 @@ class GeocoderAPIRepository(BaseAPIRepository):
         """
         data_yandex_geocoder = json.loads(await response.read())
 
-        print(data_yandex_geocoder)
-
         return GeocoderDTO(
             coordinates=data_yandex_geocoder['response']['GeoObjectCollection'][
                 'featureMember'][0]['GeoObject']['Point']['pos'],

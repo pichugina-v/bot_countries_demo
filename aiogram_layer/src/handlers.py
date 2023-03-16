@@ -12,7 +12,6 @@ from aiogram_layer.src.keyboards import (
 )
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
-    COUNTRY_DETAIL,
     COUNTRY_INFO,
     COUNTRY_INFO_NAME,
     CURRENCY_RATE_DETAIL,
@@ -27,6 +26,7 @@ from aiogram_layer.src.messages import (
 )
 from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_user_input_valid
+from services.country_service import CountryService
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -122,7 +122,17 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     """
     detail_text = WEATHER_DETAIL
     if (await state.get_state()) == 'CountryCityForm:country_search':
-        detail_text = WEATHER_DETAIL_COUNTRY
+        async with state.proxy() as data:
+            weather = await CountryService().get_capital_weather(
+                data['capital_latitude'],
+                data['capital_longitude']
+            )
+            capital = data['capital']
+        detail_text = WEATHER_DETAIL_COUNTRY.format(
+            capital=capital,
+            current_temp=weather.current_weather_temp,
+            feels_like_temp=weather.current_weather_temp_feels_like
+        )
     await callback.message.reply(
         text=detail_text,
         reply_markup=weather_detail
@@ -143,7 +153,7 @@ async def get_country_info(callback: types.CallbackQuery):
     :return: None
     """
     await callback.message.reply(
-        text=COUNTRY_DETAIL,
+        text=COUNTRY_INFO_NAME,
         reply_markup=country_detail
     )
 
@@ -152,7 +162,7 @@ async def get_country_info(callback: types.CallbackQuery):
     lambda call: call.data == cb.currency_rate.value,
     state=CountryCityForm
 )
-async def get_currency_rate(callback: types.CallbackQuery):
+async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Курс валюты' button.
     Continues the dialog about currency rate.
@@ -161,6 +171,9 @@ async def get_currency_rate(callback: types.CallbackQuery):
 
     :return: None
     """
+    # async with state.proxy() as data:
+    #     currency_rates = await CountryService().get_currecny(data['currencies'])
+    #     print(currency_rates)
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL,
         reply_markup=currency_detail
@@ -219,7 +232,7 @@ async def process_country_name_invalid(message: types.Message):
 
 
 @dp.message_handler(state=Form.country_search)
-async def process_country_name(message: types.Message):
+async def process_country_name(message: types.Message, state: FSMContext):
     """
     This handler will be called when user inputs country name.
 
@@ -227,7 +240,23 @@ async def process_country_name(message: types.Message):
 
     :return: None
     """
+    country_info = await CountryService().get_country(message.text)
+    capital_info = await CountryService().get_capital_info(message.text)
+    currencies = await CountryService().get_currency(message.text)
+    languages = await CountryService().get_languages(message.text)
+    async with state.proxy() as data:
+        data['capital'] = capital_info[2]
+        data['capital_longitude'] = capital_info[0]
+        data['capital_latitude'] = capital_info[1]
+        data['currencies'] = currencies
     await message.reply(
-        text=COUNTRY_INFO_NAME.format(country=message.text),
+        text=COUNTRY_INFO_NAME.format(
+            name_ru=country_info.name_ru,
+            name_en=country_info.name_en,
+            area_size=country_info.area_size,
+            population=country_info.population,
+            languages=' '.join(str(language) for language in languages.languages),
+            currencies=', '.join(str(currency.name) for currency in currencies)
+        ),
         reply_markup=country_detail
     )

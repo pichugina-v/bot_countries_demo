@@ -30,8 +30,7 @@ class CountryDBRepository(BaseDBRepository):
         """
         new_country = await Country.objects.acreate(
             iso_code=data.iso_code,
-            name_en=data.name_en,
-            name_ru=data.name_ru,
+            name=data.name_ru,
             area_size=data.area_size,
             population=data.population
         )
@@ -51,8 +50,7 @@ class CountryDBRepository(BaseDBRepository):
         :return: created country record from Country table
         """
         country = await Country.objects.filter(pk=iso_code).aupdate(
-            name_en=data.name_en,
-            name_ru=data.name_ru,
+            name=data.name_ru,
             area_size=data.area_size,
             population=data.population
         )
@@ -86,7 +84,7 @@ class CountryDBRepository(BaseDBRepository):
         :return: country record from Country table or None
         """
         try:
-            country = await Country.objects.aget(name_ru=name)
+            country = await Country.objects.aget(name=name)
             return country
         except Country.DoesNotExist:
             return None

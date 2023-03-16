@@ -25,8 +25,8 @@ class CurrencyAPIRepository(BaseAPIRepository):
         response = await self._send_request(url=CURRENCY_INFO_URL)
         if response.status == HTTPStatus.OK:
             currencies = await self._parse_response(response)
-            currency = currencies.get(char_code.value) if currencies else None
-            rate = currency.value if currency else None
+            currency = currencies.get(char_code) if currencies else None
+            rate = currency if currency else None
 
             return rate
 

@@ -40,9 +40,9 @@ class CountryService:
         country_info = await self.geocoder.get_base_info(name)
         if not country_info:
             return None
-        cache_country = await self.cache.get(country_info.coordinates)
-        if cache_country:
-            return cache_country
+        cache_country = await self.cache.exists(country_info.coordinates)
+        if cache_country.data_bool:
+            return await self.cache.get(country_info.coordinates)
         db_country = await self.crud.get_by_name(name=country_info.name)
         if db_country is None:
             db_country = await self.crud.get_by_pk(country_info.country_code)
@@ -109,22 +109,22 @@ class CountryService:
             return languages
         return None
 
-    # async def get_currency(self, name: str) -> CurrencyServiceSchema | None:
-    #     """
-    #     Returns information about currency of the country
+    async def get_currency(self, name: str) -> CurrencyServiceSchema | None:
+        """
+        Returns information about currency of the country
 
-    #     :param name: country name
+        :param name: country name
 
-    #     :return: information about currency
-    #     """
-    #     db_country = await self._get_db_country(name)
-    #     if db_country is not None:
-    #         currencies = await self.crud.get_country_currency(db_country.iso_code)
-    #         if currencies is not None:
-    #             currencies_info = []
-    #             for currency_code in currencies.currency_codes:
-    #                 currency = await self.currency_repo.get_rate(currency_code)
-    #                 if currency is not None:
-    #                     currencies_info.append(currency)
-    #             return currencies_info
-    #     return None
+        :return: information about currency
+        """
+        db_country = await self._get_db_country(name)
+        if db_country is not None:
+            currencies = await self.crud.get_country_currency(db_country.iso_code)
+            if currencies is not None:
+                currencies_info = []
+                for currency_code in currencies.currency_codes:
+                    currency = await self.currency_repo.get_rate(currency_code)
+                    if currency is not None:
+                        currencies_info.append(currency)
+                return currencies_info
+        return None

@@ -20,13 +20,18 @@ COUNTRY_INFO = '''
 Информация о стране, где расположен город {city}
 '''
 COUNTRY_INFO_NAME = '''
-Информация о стране {country}
+Информация о стране.
+Название: {name_ru}, назавние на английском: {name_en}.
+Площадь страны {area_size}, население составляет {population}.
+Государственный язык - {languages}.
+Государственная валюта - {currencies}.
 '''
 WEATHER_DETAIL = '''
 Погода в выбранном городе
 '''
 WEATHER_DETAIL_COUNTRY = '''
-Погода в столице
+Температура в городе {capital}: {current_temp}.
+Ощущается как: {feels_like_temp}
 '''
 COUNTRY_DETAIL = '''
 Подробнее о стране
