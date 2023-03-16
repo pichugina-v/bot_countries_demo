@@ -16,6 +16,9 @@ class CurrencySchema(BaseModel):
 
 
 class CountrySchema(BaseModel):
+    """
+    Pydantic schema for CountryAPIRepository. Using for parsing response from CountryAPI.
+    """
     iso_code: str
     name_en: str
     name_ru: str

@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-YANDEX_API_KEY = os.environ['YANDEX_API_KEY']
 WEATHER_API_KEY = os.environ['WEATHER_API_KEY']
+YANDEX_API_KEY = os.environ['YANDEX_API_KEY']
 
 COUNTRY_INFO_URL = os.environ['COUNTRY_INFO_URL']
 WEATHER_INFO_URL = os.environ['WEATHER_INFO_URL']
