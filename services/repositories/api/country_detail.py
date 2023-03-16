@@ -41,8 +41,7 @@ class CountryAPIRepository(BaseAPIRepository):
         country_data = (await response.json())[0]
         return CountrySchema(
             iso_code=country_data['cca2'],
-            name_en=country_data['name']['common'],
-            name_ru=country_data['translations']['rus']['common'],
+            name=country_data['translations']['rus']['common'],
             capital=country_data['capital'][0],
             capital_longitude=country_data['capitalInfo']['latlng'][1],
             capital_latitude=country_data['capitalInfo']['latlng'][0],

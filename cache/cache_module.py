@@ -18,7 +18,6 @@ class Cache:
         """
         country_data = await redis.get(PREFIX_COUNTRY + coordinates)
         print(PREFIX_COUNTRY + coordinates)
-        print()
         await redis.close()
         if country_data:
             return CountrySchema(**json.loads(country_data))
@@ -39,15 +38,13 @@ class Cache:
         return None
 
     @staticmethod
-    async def create_or_update_country(country_data: CountrySchema) -> None:
+    async def create_or_update_country(coordinates: str, country_data: CountrySchema) -> None:
         """
         Function creates or updates country cache
         :param country_data
         :return: None
         """
-        longitude = str(country_data.capital_longitude)
-        latitude = str(country_data.capital_latitude)
-        key_country = PREFIX_COUNTRY + longitude + ' ' + latitude
+        key_country = PREFIX_COUNTRY + coordinates
         await redis.set(key_country, json.dumps(dict(country_data)), TTL)
         await redis.close()
 
