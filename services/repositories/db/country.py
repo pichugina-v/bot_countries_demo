@@ -180,12 +180,12 @@ class CountryDBRepository(BaseDBRepository):
 
     async def get_city_by_country_pk(self, country_pk) -> Capital | None:
         """
-        Looking for capital record with requested country pk.
-        Returns a capital record from Capital table or None, if not found.
+        Looking for city record with requested country pk.
+        Returns a city record from City table or None, if not found.
 
         :param country_pk: country database identificator
 
-        :return: capital record from Capital table or None
+        :return: city record from City table or None
         """
         try:
             city = await City.objects.aget(country_id=country_pk)

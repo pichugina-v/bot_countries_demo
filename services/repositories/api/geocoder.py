@@ -3,7 +3,7 @@ import json
 from aiohttp import ClientResponse
 from pydantic import BaseModel
 
-from services.repositories.api.api_settings import GEOCODER_URL
+from services.repositories.api.api_settings import GEOCODER_URL, YANDEX_API_KEY
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
@@ -22,7 +22,10 @@ class GeocoderAPIRepository(BaseAPIRepository):
 
         :return: Latitude and Longitude and country code
         """
-        url = str(GEOCODER_URL).format(city_or_country_name=city_or_country_name)
+        url = str(GEOCODER_URL).format(
+            yandex_api_key=YANDEX_API_KEY,
+            city_or_country_name=city_or_country_name
+        )
         response = await self._send_request(url=url)
         return await self._parse_response(response)
 
