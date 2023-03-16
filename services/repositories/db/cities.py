@@ -1,13 +1,14 @@
 from django_layer.countries_app.models import City, Country
 from services.repositories.api.api_schemas import CitySchema
+from services.repositories.db.base_db_repository import BaseDBRepository
 
 
-class CityBDRerpository:
+class CityBDRerpository(BaseDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
     """
 
-    async def get_by_id(self, city_id: int) -> City | None:
+    async def get_by_pk(self, city_id: int) -> City | None:
         """
         Looking for city record with requested id.
         Returns a city record from City table.
@@ -63,7 +64,7 @@ class CityBDRerpository:
         :return: updated city record from City table
         """
         await City.objects.filter(id=city_id).aupdate(name=new_name)
-        updated_city = await self.get_by_id(city_id)
+        updated_city = await self.get_by_pk(city_id)
         return updated_city
 
 
