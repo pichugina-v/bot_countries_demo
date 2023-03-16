@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
-
 from aiohttp import ClientResponse, ClientSession
 
+from services.repositories.api.abstract_api_repository import AbstractAPIRepository
 
-class BaseAPIRepository(ABC):
+
+class BaseAPIRepository(AbstractAPIRepository):
     """
-    Abstract class for API repositories
+    Base class for API repositories. Contain logic for sending request
     """
 
     @staticmethod
@@ -20,13 +20,3 @@ class BaseAPIRepository(ABC):
         async with ClientSession() as session:
             resp = await session.get(url)
         return resp
-
-    @abstractmethod
-    async def _parse_response(self, response: ClientResponse):
-        """
-        Abstract function for parsing response
-
-        :param response: response from API
-
-        :return: None
-        """

@@ -11,6 +11,7 @@ class GeocoderDTO(BaseModel):
     coordinates: str
     country_code: str
     search_type: str
+    name: str
 
 
 class GeocoderAPIRepository(BaseAPIRepository):
@@ -38,6 +39,9 @@ class GeocoderAPIRepository(BaseAPIRepository):
         :return: parsed response
         """
         data_yandex_geocoder = json.loads(await response.read())
+
+        print(data_yandex_geocoder)
+
         return GeocoderDTO(
             coordinates=data_yandex_geocoder['response']['GeoObjectCollection'][
                 'featureMember'][0]['GeoObject']['Point']['pos'],
@@ -45,5 +49,11 @@ class GeocoderAPIRepository(BaseAPIRepository):
                 'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData'][
                 'Address']['country_code'],
             search_type=data_yandex_geocoder['response']['GeoObjectCollection'][
-                'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind']
+                'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind'],
+            name=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['name']
         )
+
+
+p = GeocoderAPIRepository()
+
+print(asyncio.run(p.get_base_info('Октябрьский')))

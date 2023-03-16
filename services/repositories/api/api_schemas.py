@@ -2,6 +2,10 @@ from pydantic import BaseModel, Field
 
 
 class CurrencySchema(BaseModel):
+    """
+    Pydantic schema for CurrencyAPIRepository. Using for parsing response from CurrencyAPI.
+    """
+
     id: str = Field(..., alias='ID')
     num_code: str = Field(..., alias='NumCode')
     char_code: str = Field(..., alias='CharCode')
@@ -9,10 +13,6 @@ class CurrencySchema(BaseModel):
     name: str = Field(..., alias='Name')
     value: float = Field(..., alias='Value')
     previous: float = Field(..., alias='Previous')
-
-
-class CurrenciesSchema(BaseModel):
-    currencies: list[CurrencySchema]
 
 
 class CountrySchema(BaseModel):
