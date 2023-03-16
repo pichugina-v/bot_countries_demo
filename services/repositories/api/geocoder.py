@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from aiohttp import ClientResponse
@@ -44,3 +45,7 @@ class GeocoderAPIRepository(BaseAPIRepository):
             search_type=data_yandex_geocoder['response']['GeoObjectCollection'][
                 'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind']
         )
+
+
+d = GeocoderAPIRepository()
+print(asyncio.run(d.get_base_info('Moscow')))
