@@ -143,7 +143,7 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     lambda call: call.data == cb.country_info.value,
     state=CountryCityForm
 )
-async def get_country_info(callback: types.CallbackQuery):
+async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Подробнее о стране' button.
     Continues the dialog about country details.
@@ -152,8 +152,18 @@ async def get_country_info(callback: types.CallbackQuery):
 
     :return: None
     """
+    async with state.proxy() as data:
+        country_info = data['country_info']
+        languages = data['languages']
+        currencies = data['currencies']
     await callback.message.reply(
-        text=COUNTRY_INFO_NAME,
+        text=COUNTRY_INFO_NAME.format(
+            name=country_info.name,
+            area_size=country_info.area_size,
+            population=country_info.population,
+            languages=', '.join(str(language) for language in languages.languages),
+            currencies=', '.join(str(currency.name) for currency in currencies)
+        ),
         reply_markup=country_detail
     )
 
@@ -175,7 +185,6 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         for currency in data['currencies']:
             currency_details += ' ' + str(currency.name) + '-' + str(currency.value)
-            print(currency_details)
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
         reply_markup=currency_detail
@@ -251,6 +260,8 @@ async def process_country_name(message: types.Message, state: FSMContext):
         data['capital_longitude'] = capital_info[0]
         data['capital_latitude'] = capital_info[1]
         data['currencies'] = currencies
+        data['languages'] = languages
+        data['country_info'] = country_info
     await message.reply(
         text=COUNTRY_INFO_NAME.format(
             name=country_info.name,
