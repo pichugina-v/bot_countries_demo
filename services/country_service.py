@@ -3,7 +3,7 @@ from typing import Any
 
 from cache.cache_module import Cache
 from django_layer.countries_app.models import Country
-from services.repositories.api.api_schemas import WeatherSchema
+from services.repositories.api.api_schemas import CountrySchema, WeatherSchema
 from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
@@ -32,31 +32,42 @@ class CountryService:
         :return: information about country or None
         """
         country_info = await self.geocoder.get_base_info(name)
+        print('1')
         if not country_info:
+            print('2')
             return None
+        print('3')
         cache_country = await self.cache.get_country(country_info.coordinates)
+        print('4')
         if cache_country is not None:
             print('I"m cached!')
             return cache_country
         db_country = await self.crud.get_by_name(name=country_info.name)
+        print('5')
         if db_country is None:
+            print('6')
             db_country = await self.crud.get_by_pk(country_info.country_code)
             if db_country is None:
-                country = await self.countries_repo.get_country_detail(country_info.country_code)
-                # country = CountrySchema(
-                #     iso_code='RU',
-                #     name='Россия',
-                #     capital='Moscow',
-                #     capital_longitude=99.505405,
-                #     capital_latitude=61.698657,
-                #     area_size=17098246.0,
-                #     population=1234567,
-                #     currencies={'EUR': 'Euro', 'USD': 'Dollar'},
-                #     languages=['Russian']
-                # )
+                print('7')
+                # country = await self.countries_repo.get_country_detail(country_info.country_code)
+                print('8')
+                country = CountrySchema(
+                    iso_code='RU',
+                    name='Россия',
+                    capital='Moscow',
+                    capital_longitude=99.505405,
+                    capital_latitude=61.698657,
+                    area_size=17098246.0,
+                    population=1234567,
+                    currencies={'EUR': 'Euro', 'USD': 'Dollar'},
+                    languages=['Russian']
+                )
                 if country:
+                    print('9')
                     db_country = await self.crud.create(country)
+                    print('10')
                     await self.cache.create_or_update_country(country_info.coordinates, country)
+        print('11')
         return db_country
 
     async def _get_db_country(self, name: str) -> Country | None:

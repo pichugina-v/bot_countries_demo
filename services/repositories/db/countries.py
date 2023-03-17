@@ -1,7 +1,7 @@
 from asgiref.sync import sync_to_async
 from pydantic import BaseModel
 
-from django_layer.countries_app.models import Capital, City, Country, Currency, Language
+from django_layer.countries_app.models import City, Country, Currency, Language
 from services.repositories.api.country_detail import CountrySchema
 from services.repositories.db.base_db_repository import BaseDBRepository
 
@@ -34,8 +34,7 @@ class CountryDBRepository(BaseDBRepository):
             area_size=data.area_size,
             population=data.population
         )
-        city = await self._create_capital_city(data)
-        await self._create_capital(data.iso_code, city.id)
+        await self._create_capital_city(data)
         await self._set_languages(data.languages, new_country)
         await self._set_currencies(data.currencies, new_country)
         return new_country
@@ -156,19 +155,6 @@ class CountryDBRepository(BaseDBRepository):
             await country.currencies.acreate(iso_code=iso_code, name=currency_name)
 
     @staticmethod
-    async def _create_capital(country_pk, city_pk) -> Capital:
-        """
-        Create a capital record in Capital table.
-
-        :param country_pk: country database identificator
-        :param city_pk: city database identificator
-
-        :return: None
-        """
-        new_capital = await Capital.objects.acreate(country_id=country_pk, city_id=city_pk)
-        return new_capital
-
-    @staticmethod
     async def _create_capital_city(data: CountrySchema):
         """
         Create a capital city record in City table
@@ -181,11 +167,12 @@ class CountryDBRepository(BaseDBRepository):
             name=data.capital,
             longitude=data.capital_longitude,
             latitude=data.capital_latitude,
+            is_capital=True,
             country=await Country.objects.aget(iso_code=data.iso_code)
         )
         return new_city
 
-    async def get_city_by_country_pk(self, country_pk) -> Capital | None:
+    async def get_city_by_country_pk(self, country_pk) -> City | None:
         """
         Looking for city record with requested country pk.
         Returns a city record from City table or None, if not found.
@@ -195,7 +182,7 @@ class CountryDBRepository(BaseDBRepository):
         :return: city record from City table or None
         """
         try:
-            city = await City.objects.aget(country_id=country_pk)
+            city = await City.objects.filter(country_id=country_pk).aget(is_capital=True)
             return city
         except City.DoesNotExist:
             return None

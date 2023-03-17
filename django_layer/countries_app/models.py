@@ -8,6 +8,7 @@ class City(models.Model):
     longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('longitude'))
     latitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('latitude'))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
+    is_capital = models.BooleanField()
 
     class Meta:
         verbose_name = _('city')
@@ -63,13 +64,3 @@ class Currency(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Capital(models.Model):
-    country = models.ForeignKey('Country', on_delete=models.PROTECT, verbose_name=_('country'))
-    city = models.ForeignKey('City', on_delete=models.PROTECT, verbose_name=_('city'))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
-
-    class Meta:
-        verbose_name = _('capital')
-        verbose_name_plural = _('capitals')
