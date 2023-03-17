@@ -9,3 +9,6 @@ hooks:
 
 run-bot:
 	poetry run python aiogram_layer/main.py
+
+server:
+	poetry run python manage.py runserver
