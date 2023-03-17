@@ -13,8 +13,9 @@ from aiogram_layer.src.keyboards import (
 )
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
+    CITY_INFO,
+    CITY_NOT_FOUND,
     COUNTRY_DETAIL,
-    COUNTRY_INFO,
     COUNTRY_INFO_NAME,
     CURRENCY_RATE_DETAIL,
     ENTER_CITY,
@@ -27,7 +28,8 @@ from aiogram_layer.src.messages import (
     WEATHER_DETAIL_COUNTRY,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
-from aiogram_layer.src.validators import is_user_input_valid
+from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
+from services.city_service import CityService
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -76,7 +78,7 @@ async def enter_city_name(callback: types.CallbackQuery):
     )
 
 
-@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.city_search)
+@dp.message_handler(lambda message: not is_city_name_valid(message.text), state=Form.city_search)
 async def process_city_name_invalid(message: types.Message):
     """
     This handler will be called when user input invalid city name.
@@ -101,12 +103,18 @@ async def process_city_name(message: types.Message):
 
     :return: None
     """
-    # s = CityService()
-    # city = await s.get_city(name=message.text)
-    await message.reply(
-        text=COUNTRY_INFO.format(city=message.text),
-        reply_markup=all_info
-    )
+    s = CityService()
+    city = await s.get_city(name=message.text)
+    if city:
+        await message.answer(
+            text=CITY_INFO.format(city=city.name),
+            reply_markup=all_info
+        )
+    else:
+        await message.reply(
+            text=CITY_NOT_FOUND,
+            reply_markup=to_main_menu
+        )
 
 
 @dp.callback_query_handler(
@@ -206,7 +214,7 @@ async def enter_country_name(callback: types.CallbackQuery):
     )
 
 
-@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.country_search)
+@dp.message_handler(lambda message: not is_country_name_valid(message.text), state=Form.country_search)
 async def process_country_name_invalid(message: types.Message):
     """
     This handler will be called when user input invalid country name.

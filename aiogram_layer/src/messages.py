@@ -22,6 +22,12 @@ COUNTRY_INFO = '''
 COUNTRY_INFO_NAME = '''
 Информация о стране {country}
 '''
+CITY_INFO = '''
+Информация о городe: {city}
+'''
+CITY_NOT_FOUND = '''
+Город с таким названием не найден
+'''
 WEATHER_DETAIL = '''
 Погода в выбранном городе
 '''
