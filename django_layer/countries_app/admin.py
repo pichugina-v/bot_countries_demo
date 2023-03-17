@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from django_layer.countries_app.models import Capital, City, Country, Currency, Language
+from django_layer.countries_app.models import City, Country, Currency, Language
 
 
 @admin.register(City)
@@ -8,11 +8,12 @@ class CityAdmin(admin.ModelAdmin):
     """
     City model class for django admin site
     """
-    list_display = ('id', 'name', 'country', 'longitude', 'latitude', 'updated_at')
+    list_display = ('id', 'name', 'is_capital', 'country', 'longitude', 'latitude', 'updated_at')
     search_fields = ['name', 'country__name']
     list_filter = (
         ('country', admin.RelatedOnlyFieldListFilter),
         ('updated_at', admin.DateFieldListFilter),
+        ('is_capital', admin.BooleanFieldListFilter),
     )
 
 
@@ -24,20 +25,6 @@ class CountryAdmin(admin.ModelAdmin):
     list_display = ('iso_code', 'name', 'population', 'area_size', 'updated_at')
     search_fields = ['iso_code', 'name']
     list_filter = (('updated_at', admin.DateFieldListFilter),)
-
-
-@admin.register(Capital)
-class CapitalAdmin(admin.ModelAdmin):
-    """
-    Capital model class for django admin site
-    """
-    list_display = ('id', 'country', 'city', 'updated_at')
-    search_fields = ['country__name', 'city__name']
-    list_filter = (
-        ('country', admin.RelatedOnlyFieldListFilter),
-        ('city', admin.RelatedOnlyFieldListFilter),
-        ('updated_at', admin.DateFieldListFilter),
-    )
 
 
 @admin.register(Language)
