@@ -40,3 +40,4 @@ class CitySchema(BaseModel):
     country_code: str
     longitude: float
     latitude: float
+    is_capital: bool
