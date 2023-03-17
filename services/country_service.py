@@ -1,20 +1,14 @@
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic import BaseModel
-
 from cache.cache_module import Cache, CacheDTO
 from django_layer.countries_app.models import Country
-from services.repositories.api.api_schemas import CurrencySchema, WeatherSchema
+from services.repositories.api.api_schemas import WeatherSchema
 from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
 from services.repositories.db.countries import CountryDBRepository, LanguageDBSchema
-
-
-class CurrencyServiceSchema(BaseModel):
-    currencies: list[CurrencySchema]
 
 
 @dataclass
@@ -109,22 +103,22 @@ class CountryService:
             return languages
         return None
 
-    # async def get_currency(self, name: str) -> CurrencyServiceSchema | None:
-    #     """
-    #     Returns information about currency of the country
+    async def get_currency(self, name: str) -> list[float] | None:
+        """
+        Returns information about currency of the country
 
-    #     :param name: country name
+        :param name: country name
 
-    #     :return: information about currency
-    #     """
-    #     db_country = await self._get_db_country(name)
-    #     if db_country is not None:
-    #         currencies = await self.crud.get_country_currency(db_country.iso_code)
-    #         if currencies is not None:
-    #             currencies_info = []
-    #             for currency_code in currencies.currency_codes:
-    #                 currency = await self.currency_repo.get_rate(currency_code)
-    #                 if currency is not None:
-    #                     currencies_info.append(currency)
-    #             return currencies_info
-    #     return None
+        :return: information about currency
+        """
+        db_country = await self._get_db_country(name)
+        if db_country is not None:
+            currencies = await self.crud.get_country_currency(db_country.iso_code)
+            if currencies is not None:
+                currencies_info = []
+                for currency_code in currencies.currency_codes:
+                    currency = await self.currency_repo.get_rate(currency_code)
+                    if currency is not None:
+                        currencies_info.append(currency)
+                return currencies_info
+        return None
