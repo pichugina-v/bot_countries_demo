@@ -1,21 +1,20 @@
 from dataclasses import dataclass
 from http import HTTPStatus
 
-from aiohttp import ClientResponse
+from aiohttp import ClientResponse, ClientSession
 
+from services.repositories.api.abstract_api_repository import AbstractAPIRepository
 from services.repositories.api.api_schemas import CountrySchema
 from services.repositories.api.api_settings import COUNTRY_INFO_URL
-from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
 @dataclass
-class CountryAPIRepository(BaseAPIRepository):
+class CountryAPIRepository(AbstractAPIRepository):
     """
     This is a class of a RestCountries repository. Provides detailed information about countries
     by sending request to external API "Restcountries.com".
     Extends of the :class:`BaseAPIRepository` class.
     """
-    api_url: str = COUNTRY_INFO_URL
 
     async def get_country_detail(self, country_code: str) -> CountrySchema | None:
         """
@@ -25,10 +24,25 @@ class CountryAPIRepository(BaseAPIRepository):
 
         :return: country details as :class:`CountrySchema` object or None
         """
-        response = await self._send_request(self.api_url.format(country_code=country_code))
+        url = f'{COUNTRY_INFO_URL}{country_code}'
+        response = await self._send_request(url=url)
         if response.status == HTTPStatus.OK:
             return await self._parse_response(response)
         return None
+
+    async def _send_request(self, url: str, params=None, body=None) -> ClientResponse:
+        """
+        Send GET response
+
+        :param url: API url address
+        :param params: optional request's query params
+        :param body: optional request's body
+
+        :return: response from API
+        """
+        async with ClientSession() as session:
+            resp = await session.get(url=url)
+        return resp
 
     async def _parse_response(self, response: ClientResponse) -> CountrySchema:
         """
@@ -41,7 +55,8 @@ class CountryAPIRepository(BaseAPIRepository):
         country_data = (await response.json())[0]
         return CountrySchema(
             iso_code=country_data['cca2'],
-            name=country_data['translations']['rus']['common'],
+            name_en=country_data['name']['common'],
+            name_ru=country_data['translations']['rus']['common'],
             capital=country_data['capital'][0],
             capital_longitude=country_data['capitalInfo']['latlng'][1],
             capital_latitude=country_data['capitalInfo']['latlng'][0],
