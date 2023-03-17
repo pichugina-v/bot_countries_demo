@@ -6,6 +6,8 @@ from services.repositories.db.abstract_db_repository import AbstractDBRepository
 class CityBDRerpository(AbstractDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
+    Supported methods: create, update, get_by_pk, get_by_name.
+    Extends of the :class:`AbstractDBRepository` class.
     """
 
     async def get_by_pk(self, city_id: int) -> City | None:
@@ -28,7 +30,7 @@ class CityBDRerpository(AbstractDBRepository):
         Looking for city record with requested name.
         Returns a city record from City table.
 
-        :param city_name: city database identificator
+        :param city_name: city name
 
         :return: city record from City table.
         """
