@@ -4,7 +4,7 @@ import json
 from aiohttp import ClientResponse
 from pydantic import BaseModel
 
-from services.repositories.api.api_settings import GEOCODER_URL
+from services.repositories.api.api_settings import GEOCODER_URL, YANDEX_API_KEY
 from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
@@ -12,6 +12,7 @@ class GeocoderDTO(BaseModel):
     coordinates: str
     country_code: str
     search_type: str
+    name: str
 
 
 class GeocoderAPIRepository(BaseAPIRepository):
@@ -23,7 +24,10 @@ class GeocoderAPIRepository(BaseAPIRepository):
 
         :return: Latitude and Longitude and country code
         """
-        url = str(GEOCODER_URL).format(city_or_country_name=city_or_country_name)
+        url = str(GEOCODER_URL).format(
+            yandex_api_key=YANDEX_API_KEY,
+            city_or_country_name=city_or_country_name
+        )
         response = await self._send_request(url=url)
         return await self._parse_response(response)
 
@@ -36,6 +40,9 @@ class GeocoderAPIRepository(BaseAPIRepository):
         :return: parsed response
         """
         data_yandex_geocoder = json.loads(await response.read())
+
+        print(data_yandex_geocoder)
+
         return GeocoderDTO(
             coordinates=data_yandex_geocoder['response']['GeoObjectCollection'][
                 'featureMember'][0]['GeoObject']['Point']['pos'],
@@ -43,7 +50,8 @@ class GeocoderAPIRepository(BaseAPIRepository):
                 'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData'][
                 'Address']['country_code'],
             search_type=data_yandex_geocoder['response']['GeoObjectCollection'][
-                'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind']
+                'featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['kind'],
+            name=data_yandex_geocoder['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['name']
         )
 
 

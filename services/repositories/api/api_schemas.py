@@ -2,6 +2,10 @@ from pydantic import BaseModel, Field
 
 
 class CurrencySchema(BaseModel):
+    """
+    Pydantic schema for CurrencyAPIRepository. Using for parsing response from CurrencyAPI.
+    """
+
     id: str = Field(..., alias='ID')
     num_code: str = Field(..., alias='NumCode')
     char_code: str = Field(..., alias='CharCode')
@@ -11,14 +15,12 @@ class CurrencySchema(BaseModel):
     previous: float = Field(..., alias='Previous')
 
 
-class CurrenciesSchema(BaseModel):
-    currencies: list[CurrencySchema]
-
-
 class CountrySchema(BaseModel):
+    """
+    Pydantic schema for CountryAPIRepository. Using for parsing response from CountryAPI.
+    """
     iso_code: str
-    name_en: str
-    name_ru: str
+    name: str
     capital: str
     capital_longitude: float
     capital_latitude: float
@@ -38,3 +40,4 @@ class CitySchema(BaseModel):
     country_code: str
     longitude: float
     latitude: float
+    is_capital: bool

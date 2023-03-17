@@ -4,10 +4,10 @@ from aiogram.dispatcher import FSMContext
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
 from aiogram_layer.src.keyboards import (
-    all_info,
     country_detail,
     currency_detail,
     main_menu,
+    to_main_menu,
     weather_detail,
 )
 from aiogram_layer.src.messages import (
@@ -18,12 +18,15 @@ from aiogram_layer.src.messages import (
     CURRENCY_RATE_DETAIL,
     ENTER_CITY,
     ENTER_COUNTRY,
+    INVALID_CITY,
+    INVALID_COUNTRY,
     RESTART_MESSAGE,
     START_MESSAGE,
     WEATHER_DETAIL,
     WEATHER_DETAIL_COUNTRY,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
+from aiogram_layer.src.validators import is_user_input_valid
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -72,6 +75,21 @@ async def enter_city_name(callback: types.CallbackQuery):
     )
 
 
+@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.city_search)
+async def process_city_name_invalid(message: types.Message):
+    """
+    This handler will be called when user input invalid city name.
+
+    :param message: message
+
+    :return: None
+    """
+    await message.reply(
+        text=INVALID_CITY,
+        reply_markup=to_main_menu
+    )
+
+
 @dp.message_handler(state=Form.city_search)
 async def process_city_name(message: types.Message):
     """
@@ -84,7 +102,7 @@ async def process_city_name(message: types.Message):
     """
     await message.reply(
         text=COUNTRY_INFO.format(city=message.text),
-        reply_markup=all_info
+        reply_markup=country_detail
     )
 
 
@@ -182,6 +200,21 @@ async def enter_country_name(callback: types.CallbackQuery):
     await Form.country_search.set()
     await callback.message.reply(
         text=ENTER_COUNTRY
+    )
+
+
+@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.country_search)
+async def process_country_name_invalid(message: types.Message):
+    """
+    This handler will be called when user input invalid country name.
+
+    :param message: message
+
+    :return: None
+    """
+    await message.reply(
+        text=INVALID_COUNTRY,
+        reply_markup=to_main_menu
     )
 
 

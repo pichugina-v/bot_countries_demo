@@ -1,13 +1,16 @@
 from django_layer.countries_app.models import City, Country
 from services.repositories.api.api_schemas import CitySchema
+from services.repositories.db.abstract_db_repository import AbstractDBRepository
 
 
-class CityBDRerpository:
+class CityBDRerpository(AbstractDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
+    Supported methods: create, update, get_by_pk, get_by_name.
+    Extends of the :class:`AbstractDBRepository` class.
     """
 
-    async def get_by_id(self, city_id: int) -> City | None:
+    async def get_by_pk(self, city_id: int) -> City | None:
         """
         Looking for city record with requested id.
         Returns a city record from City table.
@@ -27,7 +30,7 @@ class CityBDRerpository:
         Looking for city record with requested name.
         Returns a city record from City table.
 
-        :param city_name: city database identificator
+        :param city_name: city name
 
         :return: city record from City table.
         """
@@ -49,11 +52,12 @@ class CityBDRerpository:
             name=data.name,
             longitude=data.longitude,
             latitude=data.latitude,
+            is_capital=data.is_capital,
             country=await Country.objects.aget(iso_code=data.country_code)
         )
         return new_city
 
-    async def update(self, city_id: int, new_name: str) -> City | None:
+    async def update(self, city_id: int, data: CitySchema) -> City | None:
         """
         Update a city record in City table
 
@@ -62,8 +66,14 @@ class CityBDRerpository:
 
         :return: updated city record from City table
         """
-        await City.objects.filter(id=city_id).aupdate(name=new_name)
-        updated_city = await self.get_by_id(city_id)
+        await City.objects.filter(id=city_id).aupdate(
+            name=data.name,
+            longitude=data.longitude,
+            latitude=data.latitude,
+            is_capital=data.is_capital,
+            country=await Country.objects.aget(iso_code=data.country_code)
+        )
+        updated_city = await self.get_by_pk(city_id)
         return updated_city
 
 
