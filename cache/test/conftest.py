@@ -14,8 +14,8 @@ from cache.test.contains import (
     COUNTRY_DATA,
 )
 
-key_city = PREFIX_CITY + CITY_COORDINATES_KEY
-key_country = PREFIX_COUNTRY + COUNTRY_COORDINATES_KEY
+KEY_CITY = PREFIX_CITY + CITY_COORDINATES_KEY
+KEY_COUNTRY = PREFIX_COUNTRY + COUNTRY_COORDINATES_KEY
 
 
 @pytest.fixture(scope='session')
@@ -33,7 +33,7 @@ async def _clear_cache_city() -> None:
     """
     The fixture to call to clear the city cache.
     """
-    await redis.delete(key_city)
+    await redis.delete(KEY_CITY)
     await redis.close()
 
 
@@ -42,7 +42,7 @@ async def _clear_cache_country() -> None:
     """
     The fixture to call to clear the country cache.
     """
-    await redis.delete(key_country)
+    await redis.delete(KEY_COUNTRY)
     await redis.close()
 
 
@@ -51,7 +51,7 @@ async def _create_cache_country() -> None:
     """
     The fixture creates a cache entry for the country.
     """
-    await redis.set(key_country, json.dumps(dict(COUNTRY_DATA)))
+    await redis.set(KEY_COUNTRY, json.dumps(dict(COUNTRY_DATA)))
     await redis.close()
 
 
@@ -60,7 +60,7 @@ async def _create_cache_city() -> None:
     """
     The fixture creates a cache entry for the city.
     """
-    await redis.set(key_city, json.dumps(dict(CITY_DATA)))
+    await redis.set(KEY_CITY, json.dumps(dict(CITY_DATA)))
     await redis.close()
 
 
@@ -70,5 +70,5 @@ async def auto_clear_cache_after_test() -> AsyncGenerator[None, None]:
     The fixture clears records in the database after passing all the tests.
     """
     yield
-    await redis.delete(key_city, key_country)
+    await redis.delete(KEY_CITY, KEY_COUNTRY)
     await redis.close()
