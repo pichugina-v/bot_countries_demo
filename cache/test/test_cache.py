@@ -17,7 +17,7 @@ class TestCache:
 
     @pytest.mark.asyncio()
     @pytest.mark.order(1)
-    async def test_get_city_none(self, clear_city: pytest_asyncio.fixture) -> None:
+    async def test_get_city_none(self, _clear_city: pytest_asyncio.fixture) -> None:
         """
         Test get empty city cache
         """
@@ -45,9 +45,7 @@ class TestCache:
 
     @pytest.mark.asyncio()
     @pytest.mark.order(4)
-    async def test_get_country_none(
-        self, clear_country: pytest_asyncio.fixture
-    ) -> None:
+    async def test_get_country_none(self, _clear_country: pytest_asyncio.fixture) -> None:
         """
         Test get empty country cache
         """
