@@ -20,7 +20,7 @@ def event_loop(*args, **kwargs) -> Generator:
 
 
 @pytest_asyncio.fixture()
-async def clear_city() -> None:
+async def _clear_city() -> None:
     """
     Removes the cache entry for the city.
     """
@@ -29,7 +29,7 @@ async def clear_city() -> None:
 
 
 @pytest_asyncio.fixture()
-async def clear_country() -> None:
+async def _clear_country() -> None:
     """
     Removes the cache entry for the country.
     """
