@@ -1,5 +1,6 @@
 import pytest
-import pytest_asyncio
+from aioredis import RedisError
+from pytest_asyncio import fixture as async_fixture
 
 from cache.cache_module import Cache
 from cache.test.contains import (
@@ -12,61 +13,86 @@ from cache.test.contains import (
 
 class TestCache:
     """
-    Repository test for cache
+    Cache repository test.
+    All tests are atomic.
     """
-
     @pytest.mark.asyncio()
-    @pytest.mark.order(1)
-    async def test_get_city_none(self, _clear_city: pytest_asyncio.fixture) -> None:
+    async def test_get_city_none(
+        self,
+        _clear_cache_city: async_fixture
+    ) -> None:
         """
-        Test get empty city cache.
+        Trying to get a non-existent city cache.
         """
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response is None
 
-    @staticmethod
     @pytest.mark.asyncio
-    @pytest.mark.order(2)
-    async def test_create_city() -> None:
+    async def test_create_city(
+        self,
+        _clear_cache_city: async_fixture
+    ) -> None:
         """
-        Test create city cache.
+        Test for creating a city entry in the cache.
         """
-        await Cache.create_or_update_city(CITY_DATA)
+        created = None
+        try:
+            await Cache.create_or_update_city(CITY_DATA)
+            created = True
+        except RedisError:
+            created = False
+        finally:
+            assert created is True
 
-    @staticmethod
     @pytest.mark.asyncio
-    @pytest.mark.order(3)
-    async def test_get_city() -> None:
+    async def test_get_city(
+        self,
+        _clear_cache_city: async_fixture,
+        _create_cache_city: async_fixture
+    ) -> None:
         """
-        Test get not empty city cache.
+        Test for getting an existing city entry in the cache.
         """
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response == CITY_DATA
 
     @pytest.mark.asyncio()
-    @pytest.mark.order(4)
-    async def test_get_country_none(self, _clear_country: pytest_asyncio.fixture) -> None:
+    async def test_get_country_none(
+        self,
+        _clear_cache_country: async_fixture
+    ) -> None:
         """
-        Test get empty country cache.
+        Trying to get a non-existent country cache.
         """
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response is None
 
-    @staticmethod
     @pytest.mark.asyncio
-    @pytest.mark.order(5)
-    async def test_create_country() -> None:
+    async def test_create_country(
+        self,
+        _clear_cache_country: async_fixture
+    ) -> None:
         """
-        Test create country cache.
+        Test for creating a country entry in the cache.
         """
-        await Cache.create_or_update_country(COUNTRY_DATA)
 
-    @staticmethod
+        created = None
+        try:
+            await Cache.create_or_update_country(COUNTRY_DATA)
+            created = True
+        except RedisError:
+            created = False
+        finally:
+            assert created is True
+
     @pytest.mark.asyncio
-    @pytest.mark.order(6)
-    async def test_get_country() -> None:
+    async def test_get_country(
+        self,
+        _clear_cache_country: async_fixture,
+        _create_cache_country: async_fixture
+    ) -> None:
         """
-        Test get not empty city cache.
+        Test for getting an existing country entry in the cache.
         """
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response == COUNTRY_DATA

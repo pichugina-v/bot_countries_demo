@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Generator
 
 import pytest
@@ -6,7 +7,12 @@ import pytest_asyncio
 
 from cache.cache_settings import PREFIX_CITY, PREFIX_COUNTRY
 from cache.cache_settings import REDIS as redis
-from cache.test.contains import CITY_COORDINATES_KEY, COUNTRY_COORDINATES_KEY
+from cache.test.contains import (
+    CITY_COORDINATES_KEY,
+    CITY_DATA,
+    COUNTRY_COORDINATES_KEY,
+    COUNTRY_DATA,
+)
 
 key_city = PREFIX_CITY + CITY_COORDINATES_KEY
 key_country = PREFIX_COUNTRY + COUNTRY_COORDINATES_KEY
@@ -23,7 +29,7 @@ def event_loop(*args, **kwargs) -> Generator:
 
 
 @pytest_asyncio.fixture()
-async def _clear_city() -> None:
+async def _clear_cache_city() -> None:
     """
     Removes the cache entry for the city.
     """
@@ -32,9 +38,21 @@ async def _clear_city() -> None:
 
 
 @pytest_asyncio.fixture()
-async def _clear_country() -> None:
+async def _clear_cache_country() -> None:
     """
     Removes the cache entry for the country.
     """
     await redis.delete(key_country)
+    await redis.close()
+
+
+@pytest_asyncio.fixture()
+async def _create_cache_country() -> None:
+    await redis.set(key_country, json.dumps(dict(COUNTRY_DATA)))
+    await redis.close()
+
+
+@pytest_asyncio.fixture()
+async def _create_cache_city() -> None:
+    await redis.set(key_city, json.dumps(dict(CITY_DATA)))
     await redis.close()
