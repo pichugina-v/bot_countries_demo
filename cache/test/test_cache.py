@@ -19,7 +19,7 @@ class TestCache:
     @pytest.mark.order(1)
     async def test_get_city_none(self, _clear_city: pytest_asyncio.fixture) -> None:
         """
-        Test get empty city cache
+        Test get empty city cache.
         """
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response is None
@@ -29,7 +29,7 @@ class TestCache:
     @pytest.mark.order(2)
     async def test_create_city() -> None:
         """
-        Test create city cache
+        Test create city cache.
         """
         await Cache.create_or_update_city(CITY_DATA)
 
@@ -38,7 +38,7 @@ class TestCache:
     @pytest.mark.order(3)
     async def test_get_city() -> None:
         """
-        Test get not empty city cache
+        Test get not empty city cache.
         """
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response == CITY_DATA
@@ -47,7 +47,7 @@ class TestCache:
     @pytest.mark.order(4)
     async def test_get_country_none(self, _clear_country: pytest_asyncio.fixture) -> None:
         """
-        Test get empty country cache
+        Test get empty country cache.
         """
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response is None
@@ -57,7 +57,7 @@ class TestCache:
     @pytest.mark.order(5)
     async def test_create_country() -> None:
         """
-        Test create country cache
+        Test create country cache.
         """
         await Cache.create_or_update_country(COUNTRY_DATA)
 
@@ -66,7 +66,7 @@ class TestCache:
     @pytest.mark.order(6)
     async def test_get_country() -> None:
         """
-        Test get not empty city cache
+        Test get not empty city cache.
         """
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response == COUNTRY_DATA
