@@ -11,11 +11,12 @@ from cache.test.contains import (
 )
 
 
-class TestCache:
+class TestCacheCity:
     """
-    Cache repository test.
+    Cache city repository test.
     All tests are atomic.
     """
+
     @pytest.mark.asyncio()
     async def test_get_city_none(
         self,
@@ -56,6 +57,12 @@ class TestCache:
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response == CITY_DATA
 
+
+class TestCacheCountry:
+    """
+    Cache city repository test.
+    All tests are atomic.
+    """
     @pytest.mark.asyncio()
     async def test_get_country_none(
         self,
