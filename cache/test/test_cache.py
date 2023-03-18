@@ -1,6 +1,5 @@
 import pytest
 
-# from cache.test.conftest import clear_city, clear_country
 from cache.cache_module import Cache
 from cache.test.contains import (
     CITY_COORDINATES_KEY,
