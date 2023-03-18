@@ -30,6 +30,15 @@ class CountrySchema(BaseModel):
     languages: list[str]
 
 
+class GeocoderSchema(BaseModel):
+    """
+    Pydantic schema for GeocoderAPIRepository. Using for parsing response from Geocoder API.
+    """
+    coordinates: str
+    country_code: str
+    search_type: str
+
+
 class WeatherSchema(BaseModel):
     current_weather_temp: float
     current_weather_temp_feels_like: float
