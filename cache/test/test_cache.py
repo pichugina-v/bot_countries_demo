@@ -1,8 +1,8 @@
 import pytest
 
+# from cache.test.conftest import clear_city, clear_country
 from cache.cache_module import Cache
-from cache.test.clear_test_data import clear_city, clear_country
-from cache.test.data_for_test import (
+from cache.test.contains import (
     CITY_COORDINATES_KEY,
     CITY_DATA,
     COUNTRY_COORDINATES_KEY,
@@ -11,10 +11,9 @@ from cache.test.data_for_test import (
 
 
 class TestCache:
-    @staticmethod
     @pytest.mark.asyncio()
     @pytest.mark.order(1)
-    async def test_get_city_none():
+    async def test_get_city_none(self, clear_city):
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response is None
 
@@ -30,12 +29,10 @@ class TestCache:
     async def test_get_city():
         cache_response = await Cache.get_city(CITY_COORDINATES_KEY)
         assert cache_response == CITY_DATA
-        await clear_city()
 
-    @staticmethod
     @pytest.mark.asyncio()
     @pytest.mark.order(4)
-    async def test_get_country_none():
+    async def test_get_country_none(self, clear_country):
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response is None
 
@@ -51,4 +48,3 @@ class TestCache:
     async def test_get_country():
         cache_response = await Cache.get_country(COUNTRY_COORDINATES_KEY)
         assert cache_response == COUNTRY_DATA
-        await clear_country()
