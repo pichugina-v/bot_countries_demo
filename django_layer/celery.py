@@ -3,15 +3,14 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_layer.settings')
 
-app = Celery('django_bot')
+app = Celery('django_layer')
 app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
 app.conf.beat_schedule = {
-    # Сохраняем данные о кликах по ссылкам каждый час одним большим запросом bulk_create
-    'saver_info': {
-        'task': 'service.tasks.saver_info',
-        'schedule': crontab(minute='0', hour='*/1'),
+    'sample_task': {
+        'task': 'tasks.tasks.sample_task',
+        'schedule': crontab(minute='*/1')
     },
 }
-app.conf.timezone = 'UTC'

@@ -16,9 +16,11 @@ class CurrencySchema(BaseModel):
 
 
 class CountrySchema(BaseModel):
+    """
+    Pydantic schema for CountryAPIRepository. Using for parsing response from CountryAPI.
+    """
     iso_code: str
-    name_en: str
-    name_ru: str
+    name: str
     capital: str
     capital_longitude: float
     capital_latitude: float
@@ -26,6 +28,15 @@ class CountrySchema(BaseModel):
     population: int
     currencies: dict[str, str]
     languages: list[str]
+
+
+class GeocoderSchema(BaseModel):
+    """
+    Pydantic schema for GeocoderAPIRepository. Using for parsing response from Geocoder API.
+    """
+    coordinates: str
+    country_code: str
+    search_type: str
 
 
 class WeatherSchema(BaseModel):
@@ -38,3 +49,4 @@ class CitySchema(BaseModel):
     country_code: str
     longitude: float
     latitude: float
+    is_capital: bool

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_layer.countries_app',
+    'tasks'
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery settings
+CELERY_BROKER_URL = 'pyamqp://rabbit:rabbit@0.0.0.0:5672'
+CELERY_RESULT_BACKEND = 'rpc://rabbit:rabbit@0.0.0.0:5672'

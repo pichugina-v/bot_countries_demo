@@ -22,4 +22,3 @@ GEOCODER_URL = 'geocoder-url'
 COUNTRY_INFO_URL = 'rest-countries-url'
 WEATHER_INFO_URL = 'weather-api-url'
 CURRENCY_INFO_URL = 'currency-api-url'
->>>>>>>>> Temporary merge branch 2

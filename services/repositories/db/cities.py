@@ -1,11 +1,13 @@
 from django_layer.countries_app.models import City, Country
 from services.repositories.api.api_schemas import CitySchema
-from services.repositories.db.base_db_repository import BaseDBRepository
+from services.repositories.db.abstract_db_repository import AbstractDBRepository
 
 
-class CityBDRerpository(BaseDBRepository):
+class CityBDRerpository(AbstractDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
+    Supported methods: create, update, get_by_pk, get_by_name.
+    Extends of the :class:`AbstractDBRepository` class.
     """
 
     async def get_by_pk(self, city_id: int) -> City | None:
@@ -28,7 +30,7 @@ class CityBDRerpository(BaseDBRepository):
         Looking for city record with requested name.
         Returns a city record from City table.
 
-        :param city_name: city database identificator
+        :param city_name: city name
 
         :return: city record from City table.
         """
@@ -50,11 +52,12 @@ class CityBDRerpository(BaseDBRepository):
             name=data.name,
             longitude=data.longitude,
             latitude=data.latitude,
+            is_capital=data.is_capital,
             country=await Country.objects.aget(iso_code=data.country_code)
         )
         return new_city
 
-    async def update(self, city_id: int, new_name: str) -> City | None:
+    async def update(self, city_id: int, data: CitySchema) -> City | None:
         """
         Update a city record in City table
 
@@ -63,7 +66,13 @@ class CityBDRerpository(BaseDBRepository):
 
         :return: updated city record from City table
         """
-        await City.objects.filter(id=city_id).aupdate(name=new_name)
+        await City.objects.filter(id=city_id).aupdate(
+            name=data.name,
+            longitude=data.longitude,
+            latitude=data.latitude,
+            is_capital=data.is_capital,
+            country=await Country.objects.aget(iso_code=data.country_code)
+        )
         updated_city = await self.get_by_pk(city_id)
         return updated_city
 
