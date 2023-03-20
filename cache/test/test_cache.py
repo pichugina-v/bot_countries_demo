@@ -85,7 +85,7 @@ class TestCacheCountry:
 
         created = None
         try:
-            await Cache.create_or_update_country(COUNTRY_DATA)
+            await Cache.create_or_update_country(COUNTRY_COORDINATES_KEY, COUNTRY_DATA)
             created = True
         except RedisError:
             created = False
@@ -95,7 +95,6 @@ class TestCacheCountry:
     @pytest.mark.asyncio
     async def test_get_country(
         self,
-        _clear_cache_country: async_fixture,
         _create_cache_country: async_fixture
     ) -> None:
         """

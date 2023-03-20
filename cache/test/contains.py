@@ -18,7 +18,5 @@ COUNTRY_DATA = CountrySchema(
     currencies=dict(key_1='value_1', key_2='value_2'),
     languages=['русский', 'английский'],
 )
-CITY_COORDINATES_KEY = str(CITY_DATA.longitude) + ' ' + str(CITY_DATA.latitude)
-COUNTRY_COORDINATES_KEY = (
-    str(COUNTRY_DATA.capital_longitude) + ' ' + str(COUNTRY_DATA.capital_latitude)
-)
+CITY_COORDINATES_KEY = f'{CITY_DATA.longitude}_{CITY_DATA.latitude}'
+COUNTRY_COORDINATES_KEY = '1234123 6623621'  # f'{COUNTRY_DATA.capital_longitude}_{COUNTRY_DATA.capital_latitude}'

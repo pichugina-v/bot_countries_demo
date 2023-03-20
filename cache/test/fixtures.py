@@ -1,31 +1,18 @@
-import asyncio
-import json
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 
-import pytest
 import pytest_asyncio
 
 from cache.cache_settings import PREFIX_CITY, PREFIX_COUNTRY
-from cache.cache_settings import REDIS as redis
 from cache.test.contains import (
     CITY_COORDINATES_KEY,
     CITY_DATA,
     COUNTRY_COORDINATES_KEY,
     COUNTRY_DATA,
 )
+from cache.test.methods import clear_redis, create_test_data
 
-KEY_CITY = PREFIX_CITY + CITY_COORDINATES_KEY
-KEY_COUNTRY = PREFIX_COUNTRY + COUNTRY_COORDINATES_KEY
-
-
-@pytest.fixture(scope='session')
-def event_loop(*_, **__) -> Generator:
-    """
-    Create event loop.
-    """
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+KEY_CITY = f'{PREFIX_CITY}{CITY_COORDINATES_KEY}'
+KEY_COUNTRY = f'{PREFIX_COUNTRY}{COUNTRY_COORDINATES_KEY.replace(" ", "_")}'
 
 
 @pytest_asyncio.fixture
@@ -33,8 +20,7 @@ async def _clear_cache_city() -> None:
     """
     The fixture to call to clear the city cache.
     """
-    await redis.delete(KEY_CITY)
-    await redis.close()
+    await clear_redis(list(KEY_CITY))
 
 
 @pytest_asyncio.fixture()
@@ -42,8 +28,7 @@ async def _clear_cache_country() -> None:
     """
     The fixture to call to clear the country cache.
     """
-    await redis.delete(KEY_COUNTRY)
-    await redis.close()
+    await clear_redis(list(KEY_COUNTRY))
 
 
 @pytest_asyncio.fixture()
@@ -51,8 +36,7 @@ async def _create_cache_country() -> None:
     """
     The fixture creates a cache entry for the country.
     """
-    await redis.set(KEY_COUNTRY, json.dumps(dict(COUNTRY_DATA)))
-    await redis.close()
+    await create_test_data(KEY_COUNTRY, COUNTRY_DATA)
 
 
 @pytest_asyncio.fixture()
@@ -60,8 +44,7 @@ async def _create_cache_city() -> None:
     """
     The fixture creates a cache entry for the city.
     """
-    await redis.set(KEY_CITY, json.dumps(dict(CITY_DATA)))
-    await redis.close()
+    await create_test_data(KEY_CITY, CITY_DATA)
 
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
@@ -70,5 +53,4 @@ async def auto_clear_cache_after_test() -> AsyncGenerator[None, None]:
     The fixture clears records in the database after passing all the tests.
     """
     yield
-    await redis.delete(KEY_CITY, KEY_COUNTRY)
-    await redis.close()
+    await clear_redis([KEY_COUNTRY, KEY_CITY])
