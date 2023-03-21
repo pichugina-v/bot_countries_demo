@@ -56,8 +56,8 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         :return: Latitude and Longitude and country code
         """
         info_country = await self.get_base_info(country_name, is_country=True)
-        if info_country and info_country.search_type == COUNTRY:  # type: ignore
-            return info_country  # type: ignore
+        if not isinstance(info_country, list) and info_country and info_country.search_type == COUNTRY:
+            return info_country
         return None
 
     async def get_base_info(self, city_or_country_name: str, is_country=False) -> for_city | for_country:
@@ -71,7 +71,7 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         if is_country:
             url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}&results=1'
         else:
-            url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}'
+            url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}&kind=locality'
         response = await self._send_request(url=url)
 
         return await self._parse_response(response)
@@ -100,16 +100,12 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         :return: parse response
         """
         data_yandex_geocoder = json.loads(await response.read())
-        row_fixed_name = None
         try:
             main_data = data_yandex_geocoder['response']['GeoObjectCollection']
             meta_data = main_data['metaDataProperty']['GeocoderResponseMetaData']
             count_result = int(meta_data['found'])
             right_name = meta_data['request']
-            try:
-                row_fixed_name = meta_data['suggest']
-            except KeyError:
-                pass
+            row_fixed_name = meta_data.get('suggest')
         except KeyError:
             return None
         except ValueError:
