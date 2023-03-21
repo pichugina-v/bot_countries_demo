@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 class City(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('name'))
     country = models.ForeignKey('Country', on_delete=models.PROTECT, verbose_name=_('country'), related_name='cities')
-    longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('longitude'))
-    latitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('latitude'))
+    longitude = models.FloatField(verbose_name=_('longitude'))
+    latitude = models.FloatField(verbose_name=_('latitude'))
     is_capital = models.BooleanField()
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
 
