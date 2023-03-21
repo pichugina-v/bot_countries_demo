@@ -19,4 +19,4 @@ COUNTRY_DATA = CountrySchema(
     languages=['русский', 'английский'],
 )
 CITY_COORDINATES_KEY = f'{CITY_DATA.longitude}_{CITY_DATA.latitude}'
-COUNTRY_COORDINATES_KEY = '1234123 6623621'  # f'{COUNTRY_DATA.capital_longitude}_{COUNTRY_DATA.capital_latitude}'
+COUNTRY_COORDINATES_KEY = '1234123 6623621'

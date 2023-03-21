@@ -34,6 +34,8 @@ class GeocoderSchema(BaseModel):
     """
     Pydantic schema for GeocoderAPIRepository. Using for parsing response from Geocoder API.
     """
+    name: str
+    full_address: str
     coordinates: str
     country_code: str
     search_type: str

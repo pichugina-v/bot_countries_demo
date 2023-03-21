@@ -20,7 +20,7 @@ class TestCacheCity:
     @pytest.mark.asyncio()
     async def test_get_city_none(
         self,
-        _clear_cache_city: async_fixture
+        _clear_cache_city: async_fixture,
     ) -> None:
         """
         Trying to get a non-existent city cache.
@@ -31,19 +31,15 @@ class TestCacheCity:
     @pytest.mark.asyncio
     async def test_create_city(
         self,
-        _clear_cache_city: async_fixture
+        _clear_cache_city: async_fixture,
+        city_data: async_fixture
     ) -> None:
         """
         Test for creating a city entry in the cache.
         """
-        created = None
-        try:
-            await Cache.create_or_update_city(CITY_DATA)
-            created = True
-        except RedisError:
-            created = False
-        finally:
-            assert created is True
+        await Cache.create_or_update_city(city_data)
+        data_from_cache = await Cache.get_city(f'{city_data.longitude}_{city_data.latitude}')
+        assert data_from_cache == city_data
 
     @pytest.mark.asyncio
     async def test_get_city(

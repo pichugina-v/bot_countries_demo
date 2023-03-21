@@ -10,9 +10,36 @@ from cache.test.contains import (
     COUNTRY_DATA,
 )
 from cache.test.methods import clear_redis, create_test_data
+from services.repositories.api.api_schemas import CitySchema, CountrySchema
 
 KEY_CITY = f'{PREFIX_CITY}{CITY_COORDINATES_KEY}'
 KEY_COUNTRY = f'{PREFIX_COUNTRY}{COUNTRY_COORDINATES_KEY.replace(" ", "_")}'
+
+
+@pytest_asyncio.fixture
+async def city_data() -> CitySchema:
+    return CitySchema(
+        name='Москва',
+        country_code='RU',
+        longitude=152342.323424,
+        latitude=643534.3423423,
+        is_capital=True,
+    )
+
+
+@pytest_asyncio.fixture
+async def _country_data() -> CountrySchema:
+    return CountrySchema(
+        iso_code='RU',
+        name='Россия',
+        capital='Москва',
+        capital_longitude=152342.323424,
+        capital_latitude=643534.3423423,
+        area_size=4545.1111,
+        population=145000000,
+        currencies=dict(key_1='value_1', key_2='value_2'),
+        languages=['русский', 'английский'],
+    )
 
 
 @pytest_asyncio.fixture
