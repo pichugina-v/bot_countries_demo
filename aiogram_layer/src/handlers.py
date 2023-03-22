@@ -41,7 +41,7 @@ async def start_page(message: types.Message):
 
     :return: None
     """
-    await message.reply(
+    return await message.reply(
         text=START_MESSAGE,
         reply_markup=main_menu
     )
@@ -58,7 +58,7 @@ async def show_about_page(callback: types.CallbackQuery):
 
     :return: None
     """
-    await callback.message.answer(
+    return await callback.message.answer(
         text=ABOUT_MESSAGE,
         reply_markup=main_menu,
     )
@@ -69,14 +69,15 @@ async def enter_city_name(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Поиск по городу' in main menu.
 
+    :param state: current state
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
     await state.set_state(Form.city_search)
-    await callback.message.reply(
-        text=ENTER_CITY
+    return await callback.message.reply(
+        text=ENTER_CITY,
+        reply_markup=to_main_menu
     )
 
 
@@ -89,7 +90,7 @@ async def process_city_name_invalid(message: types.Message):
 
     :return: None
     """
-    await message.reply(
+    return await message.reply(
         text=INVALID_CITY,
         reply_markup=to_main_menu
     )
