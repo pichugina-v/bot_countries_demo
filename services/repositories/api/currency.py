@@ -5,10 +5,10 @@ from aiohttp import ClientResponse
 
 from services.repositories.api.api_schemas import CurrencySchema
 from services.repositories.api.api_settings import CURRENCY_INFO_URL
-from services.repositories.api.base_api_repository import BaseAPIRepository
+# from services.repositories.api.base_api_repository import BaseAPIRepository
 
 
-class CurrencyAPIRepository(BaseAPIRepository):
+class CurrencyAPIRepository:
     """
     This class is a repository for making requests in currency API.
     """

@@ -29,7 +29,9 @@ CITY_NOT_FOUND = '''
 Город с таким названием не найден
 '''
 WEATHER_DETAIL = '''
-Погода в выбранном городе
+Погода в городе {city}:
+Температура: {temperature}
+Ощущается как: {feels_like}
 '''
 WEATHER_DETAIL_COUNTRY = '''
 Погода в столице

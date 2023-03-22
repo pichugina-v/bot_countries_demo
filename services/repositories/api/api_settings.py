@@ -14,4 +14,4 @@ WEATHER_INFO_URL = os.environ['WEATHER_INFO_URL']
 CURRENCY_INFO_URL = os.environ['CURRENCY_INFO_URL']
 
 COUNTRY = 'country'
-CITY = 'province'
+CITY = ('province', 'locality')

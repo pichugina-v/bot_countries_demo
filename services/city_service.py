@@ -1,9 +1,12 @@
 from cache.cache_module import Cache
-from services.repositories.api.geocoder import GeocoderAPIRepository, GeocoderDTO
+from services.repositories.abstract_uow import AbstractUnitOfWork
+from services.repositories.api.api_schemas import GeocoderSchema, CitySchema, WeatherSchema
+from services.repositories.api.geocoder import GeocoderAPIRepository
+from services.repositories.api.weather import WeatherAPIRepository
 from services.repositories.db.cities import CityBDRerpository
 
 
-class CityService:
+class CityService(AbstractUnitOfWork):
     """
     Class for get info about city from same repositories.
     """
@@ -12,16 +15,17 @@ class CityService:
         self.geocoder = GeocoderAPIRepository()
         self.repository = CityBDRerpository()
         self.cache = Cache()
+        self.weather_repo: WeatherAPIRepository = WeatherAPIRepository()
 
     # async def get_city(self, name: str) -> CacheDTO | City | None:
-    async def get_city(self, name: str) -> GeocoderDTO | None:
+    async def get_city(self, name: str) -> GeocoderSchema | None:
         """
         Try to get info about city from same repositories.
 
         :param name: city name
         :return: information about city
         """
-        city_info = await self.geocoder.get_base_info(name)
+        city_info = await self.geocoder.get_city(name)
         print(city_info)
         return city_info
         # if city_info:
@@ -34,8 +38,9 @@ class CityService:
         #     return db_city
         # return None
 
-    async def get_city_weather(self, city_name: str):
-        pass
+    async def get_city_weather(self, latitude: float, longitude: float) -> WeatherSchema | None:
+        weather = await self.weather_repo.get_weather(latitude, longitude)
+        return weather
 
     # async def get_currency(self, name: str) -> float | None:
     #     """

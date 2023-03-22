@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 from aiohttp import ClientResponse, ClientSession
 
@@ -24,7 +25,7 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         :return: Latitude and Longitude and country code
         """
         info_city = await self.get_base_info(city_name)
-        if info_city and info_city.search_type == CITY:
+        if info_city and info_city.search_type in CITY:
             return info_city
         return None
 
@@ -50,7 +51,8 @@ class GeocoderAPIRepository(AbstractAPIRepository):
 
         :return: Latitude and Longitude and country code
         """
-        url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}'
+        # url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}'
+        url = GEOCODER_URL.format(city_or_country_name=city_or_country_name)
         response = await self._send_request(url=url)
         return await self._parse_response(response)
 
@@ -83,7 +85,8 @@ class GeocoderAPIRepository(AbstractAPIRepository):
             coordinates = geo_obj['Point']['pos']
             country_code = geocoder_meta_data['Address']['country_code']
             search_type = geocoder_meta_data['kind']
+            name = geo_obj['name']
         except KeyError:
             return None
         return GeocoderSchema(coordinates=coordinates, country_code=country_code,
-                              search_type=search_type)
+                              search_type=search_type, name=name)

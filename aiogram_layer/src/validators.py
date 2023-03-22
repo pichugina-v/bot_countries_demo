@@ -1,4 +1,4 @@
-from aiogram_layer.src.settings import INVALID_CHARS
+from aiogram_layer.src.constants import INVALID_CHARS
 
 
 def is_city_name_valid(city_name: str) -> bool:
