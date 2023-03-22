@@ -1,5 +1,6 @@
 from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram.filters import Command, Text
+from aiogram.fsm.context import FSMContext
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
@@ -12,9 +13,9 @@ from aiogram_layer.src.keyboards import (
 )
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
-    COUNTRY_DETAIL,
+    CITY_INFO,
     COUNTRY_INFO,
-    COUNTRY_INFO_NAME,
+    COUNTRY_NOT_FOUND,
     CURRENCY_RATE_DETAIL,
     ENTER_CITY,
     ENTER_COUNTRY,
@@ -26,15 +27,17 @@ from aiogram_layer.src.messages import (
     WEATHER_DETAIL_COUNTRY,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
-from aiogram_layer.src.validators import is_user_input_valid
+from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
+from services.country_service import CountryService
 
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message(Command('start', 'help'))
 async def start_page(message: types.Message):
     """
     This handler will be called when user sends /start or /help command
 
     :param message: message
+    :type message: types.Message
 
     :return: None
     """
@@ -44,13 +47,14 @@ async def start_page(message: types.Message):
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == cb.about.value)
+@dp.callback_query(Text(cb.about.value))
 async def show_about_page(callback: types.CallbackQuery):
     """
     This handler will be called when user chooses 'О проекте' in main menu.
     Shows info about bot's features.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -60,22 +64,23 @@ async def show_about_page(callback: types.CallbackQuery):
     )
 
 
-@dp.callback_query_handler(lambda call: call.data == cb.city.value)
-async def enter_city_name(callback: types.CallbackQuery):
+@dp.callback_query(Text(cb.city.value))
+async def enter_city_name(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Поиск по городу' in main menu.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
 
     :return: None
     """
-    await Form.city_search.set()
+    await state.set_state(Form.city_search)
     await callback.message.reply(
         text=ENTER_CITY
     )
 
 
-@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.city_search)
+@dp.message(lambda message: not is_city_name_valid(message.text), Form.city_search)
 async def process_city_name_invalid(message: types.Message):
     """
     This handler will be called when user input invalid city name.
@@ -90,25 +95,26 @@ async def process_city_name_invalid(message: types.Message):
     )
 
 
-@dp.message_handler(state=Form.city_search)
+@dp.message(Form.city_search)
 async def process_city_name(message: types.Message):
     """
     This handler will be called when user inputs city name.
     Continues the dialogue about the country where the city is located.
 
     :param message: message
+    :type: types.Message
 
     :return: None
     """
     await message.reply(
-        text=COUNTRY_INFO.format(city=message.text),
+        text=CITY_INFO.format(city=message.text),
         reply_markup=country_detail
     )
 
 
-@dp.callback_query_handler(
-    lambda call: call.data == cb.weather.value,
-    state=CountryCityForm
+@dp.callback_query(
+    Text(cb.weather.value),
+    CountryCityForm()
 )
 async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     """
@@ -116,60 +122,77 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     Continues the dialog about weather details.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
     :param state: state
+    :type state: FSMContext
 
     :return: None
     """
     detail_text = WEATHER_DETAIL
     if (await state.get_state()) == 'CountryCityForm:country_search':
-        detail_text = WEATHER_DETAIL_COUNTRY
+        data = await state.get_data()
+        weather = await CountryService().get_capital_weather(data['country_info'])
+        detail_text = WEATHER_DETAIL_COUNTRY.format(
+            curr=weather.current_weather_temp,
+            feels=weather.current_weather_temp_feels_like
+        )
     await callback.message.reply(
         text=detail_text,
         reply_markup=weather_detail
     )
 
 
-@dp.callback_query_handler(
-    lambda call: call.data == cb.country_info.value,
-    state=CountryCityForm
+@dp.callback_query(
+    Text(cb.country_info.value),
+    CountryCityForm()
 )
-async def get_country_info(callback: types.CallbackQuery):
+async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Подробнее о стране' button.
     Continues the dialog about country details.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
 
     :return: None
     """
+    data = await state.get_data()
     await callback.message.reply(
-        text=COUNTRY_DETAIL,
+        text=COUNTRY_INFO.format(
+            country=data['country_detail'],
+            languages=', '.join(str(language) for language in data['languages']),
+            currencies=', '.join(str(currency.name) for currency in data['currencies'])
+        ),
         reply_markup=country_detail
     )
 
 
-@dp.callback_query_handler(
-    lambda call: call.data == cb.currency_rate.value,
-    state=CountryCityForm
+@dp.callback_query(
+    Text(cb.currency_rate.value),
+    CountryCityForm()
 )
-async def get_currency_rate(callback: types.CallbackQuery):
+async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Курс валюты' button.
     Continues the dialog about currency rate.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
 
     :return: None
     """
+    currency_details = ''
+    data = await state.get_data()
+    for currency in data['currencies']:
+        currency_details += ' ' + str(currency.name) + '-' + str(currency.value)
     await callback.message.reply(
-        text=CURRENCY_RATE_DETAIL,
+        text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
         reply_markup=currency_detail
     )
 
 
-@dp.callback_query_handler(
-    lambda call: call.data == cb.to_main_menu.value,
-    state='*'
+@dp.callback_query(
+    Text(cb.to_main_menu.value)
 )
 async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     """
@@ -177,19 +200,21 @@ async def return_to_main_menu(callback: types.CallbackQuery, state: FSMContext):
     Resets all states, restarts dialog.
 
     :param callback: callback function
+    :type callback: types.CallbackQuery
     :param state: state
+    :type state: FSMContext
 
     :return: None
     """
-    await state.reset_state(with_data=True)
+    await state.clear()
     await callback.message.reply(
         text=RESTART_MESSAGE,
         reply_markup=main_menu,
     )
 
 
-@dp.callback_query_handler(lambda call: call.data == cb.country.value)
-async def enter_country_name(callback: types.CallbackQuery):
+@dp.callback_query(Text(cb.country.value))
+async def enter_country_name(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Поиск по стране'.
 
@@ -197,13 +222,13 @@ async def enter_country_name(callback: types.CallbackQuery):
 
     :return: None
     """
-    await Form.country_search.set()
+    await state.set_state(Form.country_search)
     await callback.message.reply(
         text=ENTER_COUNTRY
     )
 
 
-@dp.message_handler(lambda message: not is_user_input_valid(message.text), state=Form.country_search)
+@dp.message(lambda message: not is_country_name_valid(message.text), Form.country_search)
 async def process_country_name_invalid(message: types.Message):
     """
     This handler will be called when user input invalid country name.
@@ -218,8 +243,8 @@ async def process_country_name_invalid(message: types.Message):
     )
 
 
-@dp.message_handler(state=Form.country_search)
-async def process_country_name(message: types.Message):
+@dp.message(Form.country_search)
+async def process_country_name(message: types.Message, state: FSMContext):
     """
     This handler will be called when user inputs country name.
 
@@ -227,7 +252,26 @@ async def process_country_name(message: types.Message):
 
     :return: None
     """
-    await message.reply(
-        text=COUNTRY_INFO_NAME.format(country=message.text),
+    info = await CountryService().get_country_info(message.text)
+    if not info:
+        return await message.answer(
+            text=COUNTRY_NOT_FOUND,
+            reply_markup=to_main_menu
+        )
+    detail = await CountryService().get_country(info)
+    languages = await CountryService().get_languages(info)
+    currencies = await CountryService().get_currencies(info)
+    await message.answer(
+        text=COUNTRY_INFO.format(
+            country=detail,
+            languages=', '.join(str(language) for language in languages.languages),
+            currencies=', '.join(str(currency.name) for currency in currencies)
+        ),
         reply_markup=country_detail
+    )
+    await state.update_data(
+        country_info=info,
+        country_detail=detail,
+        languages=languages.languages,
+        currencies=currencies
     )

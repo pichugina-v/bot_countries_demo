@@ -83,7 +83,8 @@ class GeocoderAPIRepository(AbstractAPIRepository):
             coordinates = geo_obj['Point']['pos']
             country_code = geocoder_meta_data['Address']['country_code']
             search_type = geocoder_meta_data['kind']
+            name = geo_obj['name']
         except KeyError:
             return None
         return GeocoderSchema(coordinates=coordinates, country_code=country_code,
-                              search_type=search_type)
+                              search_type=search_type, name=name)

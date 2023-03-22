@@ -37,6 +37,7 @@ class GeocoderSchema(BaseModel):
     coordinates: str
     country_code: str
     search_type: str
+    name: str
 
 
 class WeatherSchema(BaseModel):
