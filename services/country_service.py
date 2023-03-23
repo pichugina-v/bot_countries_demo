@@ -7,7 +7,7 @@ from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
 from services.repositories.db.countries import CountryDBRepository
-from services.repositories.db.schemas import LanguageNamesSchema
+from services.repositories.db.schemas import CurrencyCodesSchema, LanguageNamesSchema
 from services.service_schemas import CityCoordinatesSchema
 
 
@@ -48,6 +48,11 @@ class CountryService:
 
     async def get_currencies(self, country_info: GeocoderSchema):
         currencies = await self.crud.get_country_currencies(country_info.country_code)
+        if not currencies:
+            country = await self.countries_repo.get_country_detail(country_info.country_code)
+            await self.crud.create(country)
+            currencies = CurrencyCodesSchema(currency_codes=list(country.currencies))
+
         return await self.currency_repo.get_rate(currencies.currency_codes)
 
     async def get_capital_weather(self, country_info: GeocoderSchema):

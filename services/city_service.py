@@ -24,12 +24,13 @@ class CityService(AbstractUnitOfWork):
         :param name: city name
         :return: information about city
         """
+        city_cache = await self.cache.get_city_by_name(name)
+        if city_cache:
+            return city_cache
         city_info = await self.geocoder.get_city(name)
         if city_info:
+            await self.cache.set_city_geocoder(city=city_info)
             return city_info
-        # cache_city = await self.cache.get_city_by_name(name)
-        # if cache_city:
-        #     return cache_city
         # db_city = await self.repository.get_by_name(city_name=city_info.name)
         # if db_city:
         #     return db_city

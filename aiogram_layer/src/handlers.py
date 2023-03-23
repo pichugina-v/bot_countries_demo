@@ -1,9 +1,11 @@
 from aiogram import types
 from aiogram.filters import Command, Text
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
+from aiogram_layer.src.callbacks import CitiesCB
 from aiogram_layer.src.keyboards import (
     country_detail,
     currency_detail,
@@ -31,6 +33,7 @@ from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 from services.city_service import CityService
 from services.country_service import CountryService
+from services.repositories.api.api_schemas import GeocoderSchema
 
 
 @dp.message(Command('start', 'help'))
@@ -76,7 +79,8 @@ async def enter_city_name(callback: types.CallbackQuery, state: FSMContext):
     :return: None
     """
     await state.set_state(Form.city_search)
-    return await callback.message.reply(
+    await callback.message.delete()
+    return await callback.message.answer(
         text=ENTER_CITY,
         reply_markup=to_main_menu
     )
@@ -115,8 +119,21 @@ async def process_city_name(message: types.Message, state: FSMContext):
             text=CITY_NOT_FOUND,
             reply_markup=to_main_menu
         )
+
+    if isinstance(city_info, list):
+        builder = InlineKeyboardBuilder()
+        for city in city_info:
+            city: GeocoderSchema
+            builder.button(text=city.full_address, callback_data=CitiesCB(coordinates=city.coordinates))
+        await state.update_data(data={city.coordinates: city for city in city_info})
+
+        return await message.answer(
+            text='По указанному названию нашлось несколько вариантов:',
+            reply_markup=builder.as_markup()
+        )
+
     await message.answer(
-        text=CITY_INFO.format(city=message.text),
+        text=CITY_INFO.format(city=city_info.name),
         reply_markup=country_detail
     )
     currencies = await CountryService().get_currencies(city_info)
@@ -126,6 +143,24 @@ async def process_city_name(message: types.Message, state: FSMContext):
         search_type=city_info.search_type,
         name=city_info.name,
         currencies=currencies,
+    )
+
+
+@dp.callback_query(CitiesCB.filter(), Form.city_search)
+async def choose_city_from_list(callback: types.CallbackQuery, callback_data: CitiesCB, state: FSMContext):
+    data = await state.get_data()
+    city_info = data[callback_data.coordinates]
+    currencies = await CountryService().get_currencies(city_info)
+    await state.update_data(
+        coordinates=city_info.coordinates,
+        country_code=city_info.country_code,
+        search_type=city_info.search_type,
+        name=city_info.name,
+        currencies=currencies,
+    )
+    return await callback.message.answer(
+        text=CITY_INFO.format(city=city_info.name.capitalize()),
+        reply_markup=country_detail
     )
 
 
@@ -230,7 +265,13 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     """
     currency_details = ''
     data = await state.get_data()
-    for currency in data['currencies']:
+    currencies = data['currencies']
+    if not currencies:
+        return callback.message.answer(
+            'Валюта страны не торгуется к рублю',
+            reply_markup=to_main_menu,
+        )
+    for currency in currencies:
         currency_details += ' ' + str(currency.name) + '-' + str(currency.value)
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
