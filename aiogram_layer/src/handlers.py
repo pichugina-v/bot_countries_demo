@@ -14,8 +14,6 @@ from aiogram_layer.src.keyboards import (
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
     CITY_NOT_FOUND,
-    COUNTRY_DETAIL,
-    COUNTRY_INFO_NAME,
     CITY_INFO,
     COUNTRY_INFO,
     COUNTRY_NOT_FOUND,
@@ -30,7 +28,6 @@ from aiogram_layer.src.messages import (
     WEATHER_DETAIL_COUNTRY,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
-from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 from services.city_service import CityService
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 from services.country_service import CountryService
@@ -176,8 +173,8 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     This handler will be called when user chooses 'Подробнее о стране' button.
     Continues the dialog about country details.
 
+    :param state: state
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -201,8 +198,8 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     This handler will be called when user chooses 'Курс валюты' button.
     Continues the dialog about currency rate.
 
+    :param state: state
     :param callback: callback function
-    :type callback: types.CallbackQuery
 
     :return: None
     """
@@ -243,6 +240,7 @@ async def enter_country_name(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Поиск по стране'.
 
+    :param state: state None
     :param callback: arg1
 
     :return: None
@@ -273,6 +271,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
     """
     This handler will be called when user inputs country name.
 
+    :param state: state
     :param message: arg1
 
     :return: None
