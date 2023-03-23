@@ -1,4 +1,5 @@
 import asyncio
+import os
 import platform
 from typing import Generator
 
@@ -6,8 +7,11 @@ import pytest
 
 pytest_plugins = [
     'services.repositories.api.tests.fixture',
-    'aiogram_layer.src.tests.fixtures',
+    'services.repositories.db.tests.fixture',
+    'aiogram_layer.src.tests.fixtures'
 ]
+
+os.environ['WEATHER_API_KEY'] = 'fake_api_key'
 
 
 @pytest.fixture(scope='session')

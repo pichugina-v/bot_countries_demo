@@ -1,9 +1,13 @@
-from aiogram import executor
+import asyncio
+
 from django.core.management.base import BaseCommand
 
-from aiogram_layer.src.app import dp
+from aiogram_layer.src.app import bot, dp
 
 
 class Command(BaseCommand):
+    async def main(self):
+        return await dp.start_polling(bot)
+
     def handle(self, *args, **options):
-        return executor.start_polling(dp, skip_updates=True)
+        asyncio.run(self.main())

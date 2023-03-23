@@ -1,6 +1,9 @@
 import pytest
 
-from aiogram_layer.src.tests.cases import is_city_name_valid_cases, is_country_name_valid_cases
+from aiogram_layer.src.tests.cases import (
+    is_city_name_valid_cases,
+    is_country_name_valid_cases,
+)
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 
 

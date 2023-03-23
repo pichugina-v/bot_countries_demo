@@ -1,24 +1,16 @@
 from asgiref.sync import sync_to_async
-from pydantic import BaseModel
 
 from django_layer.countries_app.models import City, Country, Currency, Language
 from services.repositories.api.country_detail import CountrySchema
-from services.repositories.db.base_db_repository import BaseDBRepository
+from services.repositories.db.abstract_db_repository import AbstractDBRepository
+from services.repositories.db.schemas import CurrencyCodesSchema, LanguageNamesSchema
 
 
-class CurrencyDBSchema(BaseModel):
-    currency_codes: list[str]
-
-
-class LanguageDBSchema(BaseModel):
-    languages: list[str]
-
-
-class CountryDBRepository(BaseDBRepository):
+class CountryDBRepository(AbstractDBRepository):
     """
     This is a class of a Country Database repository. Provides CRUD operations for Country entity.
-    Supported methods: create, update, get_by_pk, get_by_name, create_capital.
-    Extends of the :class:`BaseDBRepository` class.
+    Supported methods: create, update, get_by_pk, get_by_name, get_capital, get_country_currencies, get_country_languages.
+    Extends of the :class:`AbstractDBRepository` class.
     """
     async def create(self, data: CountrySchema) -> Country:
         """
@@ -34,12 +26,12 @@ class CountryDBRepository(BaseDBRepository):
             area_size=data.area_size,
             population=data.population
         )
-        await self._create_capital_city(data)
         await self._set_languages(data.languages, new_country)
         await self._set_currencies(data.currencies, new_country)
+        await self._create_capital_city(data)
         return new_country
 
-    async def update(self, iso_code: str, data: CountrySchema) -> Country:
+    async def update(self, data: CountrySchema) -> Country:
         """
         Update a country record in Country table.
 
@@ -48,12 +40,15 @@ class CountryDBRepository(BaseDBRepository):
 
         :return: created country record from Country table
         """
-        country = await Country.objects.filter(pk=iso_code).aupdate(
-            name=data.name,
-            area_size=data.area_size,
-            population=data.population
+        country, created = await Country.objects.aupdate_or_create(
+            iso_code=data.iso_code,
+            defaults={
+                'name': data.name,
+                'area_size': data.area_size,
+                'population': data.population
+            }
         )
-        country = await self.get_by_pk(iso_code)
+        await self._update_capital_city(data)
         await self._update_languages(data.languages, country)
         await self._update_currencies(data.currencies, country)
         return country
@@ -88,8 +83,52 @@ class CountryDBRepository(BaseDBRepository):
         except Country.DoesNotExist:
             return None
 
-    @staticmethod
-    async def _set_languages(languages: list, country: Country) -> None:
+    async def get_capital(self, country_pk: str) -> City | None:
+        """
+        Looking for city record with requested country pk.
+        Returns a city record from City table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: city record from City table or None
+        """
+        try:
+            city = await City.objects.filter(country_id=country_pk).aget(is_capital=True)
+            return city
+        except City.DoesNotExist:
+            return None
+
+    async def get_country_currencies(self, country_pk: str) -> CurrencyCodesSchema | None:
+        """
+        Looking for all currency records with requested country pk.
+        Returns a list of currency names from Currency table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: list of currency names from Currency table or None
+        """
+        country = await self.get_by_pk(country_pk)
+        if country:
+            currencies = [currency.iso_code async for currency in await sync_to_async(country.currencies.all)()]
+            return CurrencyCodesSchema(currency_codes=currencies)
+        return None
+
+    async def get_country_languages(self, country_pk: str) -> LanguageNamesSchema | None:
+        """
+        Looking for all language records with requested country pk.
+        Returns a list of languages names from Language table or None, if not found.
+
+        :param country_pk: country database identificator
+
+        :return: list of language names from Language table or None
+        """
+        country = await self.get_by_pk(country_pk)
+        if country:
+            languages = [language.name async for language in await sync_to_async(country.languages.all)()]
+            return LanguageNamesSchema(languages=languages)
+        return None
+
+    async def _set_languages(self, languages: list, country: Country) -> None:
         """
         Create new languages for concrete country in database or sets existing language for country.
 
@@ -98,32 +137,36 @@ class CountryDBRepository(BaseDBRepository):
 
         :return: None
         """
-        for language in languages:
-            try:
-                existing_language = await Language.objects.aget(name=language)
-                await sync_to_async(country.languages.add)(existing_language)
-            except Language.DoesNotExist:
-                await country.languages.acreate(name=language)
+        filtered_languages = await sync_to_async(Language.objects.filter)(name__in=languages)
+        existing_languages = [language async for language in await sync_to_async(filtered_languages.all)()]
+        languages = [
+            language for language in languages if language not in [
+                language.name for language in existing_languages
+            ]
+        ]
+        new_languages = [Language(name=language) for language in languages]
+        await self._bulk_create_languages(country, new_languages, existing_languages)
 
-    @staticmethod
-    async def _set_currencies(currencies: dict, country: Country) -> None:
+    async def _set_currencies(self, currencies: dict, country: Country) -> None:
         """
         Create new currencies for concrete country in database or sets existing currencies for country.
 
-        :param currencies: dict of currencies (example: {"CAN", "Canadian dollar"})
+        :param currencies: dict of currencies (example: {"CAN": "Canadian dollar", "EUR": "Euro"})
         :param country: Country object
 
         :return: None
         """
-        for iso_code, currency_name in currencies.items():
-            try:
-                existing_currency = await Currency.objects.aget(iso_code=iso_code)
-                await sync_to_async(country.currencies.add)(existing_currency)
-            except Currency.DoesNotExist:
-                await country.currencies.acreate(iso_code=iso_code, name=currency_name)
+        filtered_currencies = await sync_to_async(Currency.objects.filter)(iso_code__in=currencies.keys())
+        existing_currencies = [currency async for currency in await sync_to_async(filtered_currencies.all)()]
+        currencies = {
+            code: name for code, name in currencies.items() if code not in [
+                currency.iso_code for currency in existing_currencies
+            ]
+        }
+        new_currencies = [Currency(iso_code=code, name=currency) for code, currency in currencies.items()]
+        await self._bulk_create_currencies(country, new_currencies, existing_currencies)
 
-    @staticmethod
-    async def _update_languages(languages: list, country: Country) -> None:
+    async def _update_languages(self, languages: list, country: Country) -> None:
         """
         Update languages for concrete country in database.
 
@@ -132,30 +175,68 @@ class CountryDBRepository(BaseDBRepository):
 
         :return: None
         """
-        async for language in country.languages.filter(country=country.iso_code):
-            await Language.objects.filter(name=language).adelete()
         await sync_to_async(country.languages.clear)()
-        for language in languages:
-            await country.languages.acreate(name=language)
+        await self._set_languages(languages, country)
 
-    @staticmethod
-    async def _update_currencies(currencies: dict, country: Country) -> None:
+    async def _update_currencies(self, currencies: dict, country: Country) -> None:
         """
         Update currencies for concrete country in database.
 
-        :param currencies: dict of currencies (example: {"CAN", "Canadian dollar"})
+        :param currencies: dict of currencies (example: {"CAN": "Canadian dollar", "EUR": "Euro"})
         :param country: Country object
 
         :return: None
         """
-        async for currency in country.currencies.filter(country=country.iso_code):
-            await Currency.objects.filter(name=currency).adelete()
+        for code, name in currencies.items():
+            await Currency.objects.filter(iso_code=code).aupdate(name=name)
         await sync_to_async(country.currencies.clear)()
-        for iso_code, currency_name in currencies.items():
-            await country.currencies.acreate(iso_code=iso_code, name=currency_name)
+        existing_currencies = [Currency(iso_code=code, name=name) for code, name in currencies.items()]
+        await self._bulk_create_currencies(country, existing_currencies=existing_currencies)
 
     @staticmethod
-    async def _create_capital_city(data: CountrySchema):
+    async def _bulk_create_languages(
+        country: Country, new_languages: list = [], existing_languages: list = []
+    ) -> None:
+        """
+        Inserts the provided list of languages for concrete country into the database.
+        Creates links between country and languages (new and existing) in the database.
+
+        :param country: Country object
+        :param new_languages: list of new Language objects to insert into the database
+        :param existing_languages: list of existing Language objects to create links with country in the database
+
+        :return: None
+        """
+        if new_languages:
+            await country.languages.abulk_create(new_languages)
+            existing_languages += new_languages
+        languages_to_country_links = [(Country.languages.through(
+            country_id=country.pk, language_id=language.pk)) for language in existing_languages]
+        await country.languages.through.objects.abulk_create(languages_to_country_links)
+
+    @staticmethod
+    async def _bulk_create_currencies(
+        country: Country, new_currencies: list = [], existing_currencies: list = []
+    ) -> None:
+        """
+        Inserts the provided list of currencies for concrete country into the database.
+        Creates links between country and currencies (new and existing) in the database.
+
+        :param country: Country object
+        :param new_currencies: list of new Currency objects to insert into the database
+        :param existing_currencies: list of existing Currency objects to create links with country in the database
+
+        :return: None
+        """
+        if new_currencies:
+            await country.currencies.abulk_create(new_currencies)
+            existing_currencies += new_currencies
+        currencies_to_country_links = [(Country.currencies.through(
+            country_id=country.pk, currency_id=currency.pk)) for currency in existing_currencies]
+        await country.currencies.through.objects.abulk_create(currencies_to_country_links)
+
+    @staticmethod
+    async def _create_capital_city(data: CountrySchema) -> City:
         """
         Create a capital city record in City table
 
@@ -172,54 +253,18 @@ class CountryDBRepository(BaseDBRepository):
         )
         return new_city
 
-    async def get_city_by_country_pk(self, country_pk) -> City | None:
+    @staticmethod
+    async def _update_capital_city(data: CountrySchema) -> None:
         """
-        Looking for city record with requested country pk.
-        Returns a city record from City table or None, if not found.
+        Update a capital city record in City table
 
-        :param country_pk: country database identificator
+        :param data: new country attributed as :class:`CountrySchema` object
 
-        :return: city record from City table or None
+        :return: None
         """
-        try:
-            city = await City.objects.filter(country_id=country_pk).aget(is_capital=True)
-            return city
-        except City.DoesNotExist:
-            return None
-
-    async def get_country_currency(self, country_pk: str) -> CurrencyDBSchema | None:
-        """
-        Looking for all currency records with requested country pk.
-        Returns a list of currency names from Currency table or None, if not found.
-
-        :param country_pk: country database identificator
-
-        :return: list of currency names from Currency table or None
-        """
-        country = await self.get_by_pk(country_pk)
-        currency_codes = []
-        if country:
-            async for currency in await sync_to_async(country.currencies.all)():
-                currency_codes.append(currency.iso_code)
-            return CurrencyDBSchema(currency_codes=currency_codes)
-        return None
-
-    async def get_country_language(self, country_pk: str) -> LanguageDBSchema | None:
-        """
-        Looking for all language records with requested country pk.
-        Returns a list of languages names from Language table or None, if not found.
-
-        :param country_pk: country database identificator
-
-        :return: list of language names from Language table or None
-        """
-        country = await self.get_by_pk(country_pk)
-        languages = []
-        if country:
-            async for language in await sync_to_async(country.languages.all)():
-                languages.append(language.name)
-            return LanguageDBSchema(languages=languages)
-        return None
+        await City.objects.filter(country_id=data.iso_code, is_capital=True).aupdate(
+            name=data.capital
+        )
 
 
 def get_country_db_repository() -> CountryDBRepository:

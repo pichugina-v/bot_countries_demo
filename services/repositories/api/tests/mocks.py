@@ -1,3 +1,6 @@
+import json
+
+
 class MockClientResponse:
     def __init__(self, text, status):
         self._text = text
@@ -11,3 +14,6 @@ class MockClientResponse:
 
     async def __aenter__(self):
         return self
+
+    async def json(self):
+        return json.loads(self._text)
