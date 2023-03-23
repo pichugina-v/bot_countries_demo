@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 
 from aiohttp import ClientResponse, ClientSession
 
@@ -51,8 +50,7 @@ class GeocoderAPIRepository(AbstractAPIRepository):
 
         :return: Latitude and Longitude and country code
         """
-        # url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}'
-        url = GEOCODER_URL.format(city_or_country_name=city_or_country_name)
+        url = f'{GEOCODER_URL}{YANDEX_API_KEY}&geocode={city_or_country_name}'
         response = await self._send_request(url=url)
         return await self._parse_response(response)
 
