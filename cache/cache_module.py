@@ -18,7 +18,7 @@ class Cache:
 
         :return: information about the country
         """
-        country_data = await redis.get(PREFIX_COUNTRY + coordinates)
+        country_data = await redis.get(f'{PREFIX_COUNTRY}{coordinates.replace(" ", "_")}')
         await redis.close()
         if country_data:
             return CountrySchema(**json.loads(country_data))
@@ -34,14 +34,14 @@ class Cache:
 
         :return: information about the city
         """
-        city_data = await redis.get(PREFIX_CITY + coordinates)
+        city_data = await redis.get(f'{PREFIX_CITY}{coordinates.replace(" ", "_")}')
         await redis.close()
         if city_data:
             return CitySchema(**json.loads(city_data))
         return None
 
     @staticmethod
-    async def create_or_update_country(country_data: CountrySchema) -> None:
+    async def create_or_update_country(coordinates: str, country_data: CountrySchema) -> None:
         """
         Function creates or updates country cache
 
@@ -49,9 +49,7 @@ class Cache:
 
         :return: None
         """
-        longitude = str(country_data.capital_longitude)
-        latitude = str(country_data.capital_latitude)
-        key_country = PREFIX_COUNTRY + longitude + ' ' + latitude
+        key_country = f'{PREFIX_COUNTRY}{coordinates.replace(" ", "_")}'
         await redis.set(key_country, json.dumps(dict(country_data)), TTL)
         await redis.close()
 
@@ -64,8 +62,6 @@ class Cache:
 
         :return: None
         """
-        longitude = str(city_data.longitude)
-        latitude = str(city_data.latitude)
-        key_city = PREFIX_CITY + longitude + ' ' + latitude
+        key_city = f'{PREFIX_CITY}{city_data.longitude}_{city_data.latitude}'
         await redis.set(key_city, json.dumps(dict(city_data)), TTL)
         await redis.close()

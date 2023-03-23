@@ -17,7 +17,6 @@ class CityService:
     async def get_city(self, name: str) -> CacheDTO | City | None:
         """
         Try to get info about city from same repositories.
-
         :param name: city name
         :return: information about city
         """

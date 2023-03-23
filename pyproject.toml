@@ -14,7 +14,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-aiogram = "^2.25.1"
+aiogram = "3.0.0b7"
 django = "^4.1.7"
 python-dotenv = "^1.0.0"
 psycopg2-binary = "^2.9.5"

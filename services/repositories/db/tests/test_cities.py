@@ -1,6 +1,7 @@
 import pytest
-from services.repositories.db.cities import CityBDRerpository
+
 from services.repositories.api.api_schemas import CitySchema
+from services.repositories.db.cities import CityBDRerpository
 
 
 @pytest.mark.django_db(transaction=True)
