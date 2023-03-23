@@ -13,8 +13,8 @@ from aiogram_layer.src.keyboards import (
 )
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
-    CITY_NOT_FOUND,
     CITY_INFO,
+    CITY_NOT_FOUND,
     COUNTRY_INFO,
     COUNTRY_NOT_FOUND,
     CURRENCY_RATE_DETAIL,
@@ -28,8 +28,8 @@ from aiogram_layer.src.messages import (
     WEATHER_DETAIL_COUNTRY,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
-from services.city_service import CityService
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
+from services.city_service import CityService
 from services.country_service import CountryService
 
 

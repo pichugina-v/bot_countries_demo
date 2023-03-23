@@ -1,23 +1,15 @@
 from dataclasses import dataclass
 
-from pydantic import BaseModel
+from service_schemas import CityCoordinatesSchema
 
 from cache.cache_module import Cache
-from services.repositories.api.api_schemas import (
-    CitySchema,
-    CurrencySchema,
-    GeocoderSchema,
-)
+from services.repositories.api.api_schemas import GeocoderSchema
 from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
 from services.repositories.db.countries import CountryDBRepository
 from services.repositories.db.schemas import LanguageNamesSchema
-
-
-class CurrencyServiceSchema(BaseModel):
-    currencies: list[CurrencySchema]
 
 
 @dataclass
@@ -66,20 +58,16 @@ class CountryService:
     async def _get_capital_info(self, country_info: GeocoderSchema):
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
-            return CitySchema(
+            return CityCoordinatesSchema(
                 name=cache_country.capital,
                 latitude=cache_country.capital_latitude,
                 longitude=cache_country.capital_longitude,
-                country_code=cache_country.iso_code,
-                is_capital=True
             )
         city = await self.crud.get_capital(country_info.country_code)
         if city:
-            return CitySchema(
+            return CityCoordinatesSchema(
                 name=city.name,
                 latitude=city.latitude,
                 longitude=city.longitude,
-                country_code=country_info.country_code,
-                is_capital=city.is_capital
             )
         return None

@@ -8,7 +8,7 @@ import pytest_asyncio
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import User, Chat, Message, CallbackQuery, Update
+from aiogram.types import CallbackQuery, Chat, Message, Update, User
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.tests.mocks import MockedBot
