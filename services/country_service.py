@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from service_schemas import CityCoordinatesSchema
-
 from cache.cache_module import Cache
 from services.repositories.api.api_schemas import GeocoderSchema
 from services.repositories.api.country_detail import CountryAPIRepository
@@ -10,6 +8,7 @@ from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
 from services.repositories.db.countries import CountryDBRepository
 from services.repositories.db.schemas import LanguageNamesSchema
+from services.service_schemas import CityCoordinatesSchema
 
 
 @dataclass

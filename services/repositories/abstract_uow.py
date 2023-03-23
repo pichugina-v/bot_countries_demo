@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class AbstractUnitOfWork(ABC):
@@ -8,11 +8,3 @@ class AbstractUnitOfWork(ABC):
 
     async def __aexit__(self, *args):
         pass
-
-    # @abstractmethod
-    # def commit(self):  #(3)
-    #     raise NotImplementedError
-    #
-    # @abstractmethod
-    # def rollback(self):  #(4)
-    #     raise NotImplementedError

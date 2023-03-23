@@ -1,13 +1,9 @@
 from cache.cache_module import Cache
 from services.repositories.abstract_uow import AbstractUnitOfWork
-from services.repositories.api.api_schemas import (
-    CitySchema,
-    GeocoderSchema,
-    WeatherSchema,
-)
+from services.repositories.api.api_schemas import GeocoderSchema, WeatherSchema
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
-from services.repositories.db.cities import CityBDRerpository
+from services.repositories.db.cities import CityBDRepository
 
 
 class CityService(AbstractUnitOfWork):
@@ -17,11 +13,10 @@ class CityService(AbstractUnitOfWork):
 
     def __init__(self):
         self.geocoder = GeocoderAPIRepository()
-        self.repository = CityBDRerpository()
+        self.repository = CityBDRepository()
         self.cache = Cache()
         self.weather_repo: WeatherAPIRepository = WeatherAPIRepository()
 
-    # async def get_city(self, name: str) -> CacheDTO | City | None:
     async def get_city(self, name: str) -> GeocoderSchema | None:
         """
         Try to get info about city from same repositories.
@@ -30,17 +25,15 @@ class CityService(AbstractUnitOfWork):
         :return: information about city
         """
         city_info = await self.geocoder.get_city(name)
-        print(city_info)
-        return city_info
-        # if city_info:
-        #     return None
-        # cache_city = await self.cache.get(city_info.coordinates)
+        if city_info:
+            return city_info
+        # cache_city = await self.cache.get_city_by_name(name)
         # if cache_city:
         #     return cache_city
         # db_city = await self.repository.get_by_name(city_name=city_info.name)
         # if db_city:
         #     return db_city
-        # return None
+        return None
 
     async def get_city_weather(self, latitude: float, longitude: float) -> WeatherSchema | None:
         weather = await self.weather_repo.get_weather(latitude, longitude)

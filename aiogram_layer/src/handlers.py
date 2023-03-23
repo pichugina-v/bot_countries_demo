@@ -103,11 +103,11 @@ async def process_city_name(message: types.Message, state: FSMContext):
     This handler will be called when user inputs city name.
     Continues the dialogue about the country where the city is located.
 
-#     :param message: user's message
-#     :param state: state
-#
-#     :return: Message
-#     """
+    :param message: user's message
+    :param state: state
+
+    :return: Message
+    """
     async with CityService() as uow:
         city_info = await uow.get_city(message.text)
     if not city_info:
@@ -119,16 +119,49 @@ async def process_city_name(message: types.Message, state: FSMContext):
         text=CITY_INFO.format(city=message.text),
         reply_markup=country_detail
     )
+    currencies = await CountryService().get_currencies(city_info)
     await state.update_data(
         coordinates=city_info.coordinates,
         country_code=city_info.country_code,
         search_type=city_info.search_type,
-        name=city_info.name)
+        name=city_info.name,
+        currencies=currencies,
+    )
 
 
 @dp.callback_query(
     Text(cb.weather.value),
-    CountryCityForm()
+    CountryCityForm().city_search
+)
+async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
+    """
+    This handler will be called when user chooses 'Погода' button.
+    Continues the dialog about weather details.
+
+    :param callback: callback function
+    :param state: state
+
+    :return: None
+    """
+
+    async with CityService() as uow:
+        data = await state.get_data()
+        long, lat = data['coordinates'].split()
+        name = data['name']
+        weather = await uow.get_city_weather(float(lat), float(long))
+    detail_text = WEATHER_DETAIL.format(feels_like=weather.current_weather_temp_feels_like,
+                                        temperature=weather.current_weather_temp,
+                                        city=name)
+
+    await callback.message.answer(
+        text=detail_text,
+        reply_markup=weather_detail,
+    )
+
+
+@dp.callback_query(
+    Text(cb.weather.value),
+    CountryCityForm().country_search
 )
 async def get_weather(callback: types.CallbackQuery, state: FSMContext):
     """
@@ -142,14 +175,6 @@ async def get_weather(callback: types.CallbackQuery, state: FSMContext):
 
     :return: None
     """
-    async with CityService() as uow:
-        data = await state.get_data()
-        long, lat = data['coordinates'].split()
-        name = data['name']
-        weather = await uow.get_city_weather(float(lat), float(long))
-    detail_text = WEATHER_DETAIL.format(feels_like=weather.current_weather_temp_feels_like,
-                                        temperature=weather.current_weather_temp,
-                                        city=name)
     detail_text = WEATHER_DETAIL
     if (await state.get_state()) == 'CountryCityForm:country_search':
         data = await state.get_data()
@@ -209,7 +234,7 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
         currency_details += ' ' + str(currency.name) + '-' + str(currency.value)
     await callback.message.reply(
         text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
-        reply_markup=currency_detail
+        reply_markup=currency_detail,
     )
 
 
@@ -262,7 +287,7 @@ async def process_country_name_invalid(message: types.Message):
     """
     await message.reply(
         text=INVALID_COUNTRY,
-        reply_markup=to_main_menu
+        reply_markup=to_main_menu,
     )
 
 
@@ -280,7 +305,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
     if not info:
         return await message.answer(
             text=COUNTRY_NOT_FOUND,
-            reply_markup=to_main_menu
+            reply_markup=to_main_menu,
         )
     detail = await CountryService().get_country(info)
     languages = await CountryService().get_languages(info)
@@ -289,7 +314,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
         text=COUNTRY_INFO.format(
             country=detail,
             languages=', '.join(str(language) for language in languages.languages),
-            currencies=', '.join(str(currency.name) for currency in currencies)
+            currencies=', '.join(str(currency.name) for currency in currencies),
         ),
         reply_markup=country_detail
     )
@@ -297,5 +322,5 @@ async def process_country_name(message: types.Message, state: FSMContext):
         country_info=info,
         country_detail=detail,
         languages=languages.languages,
-        currencies=currencies
+        currencies=currencies,
     )

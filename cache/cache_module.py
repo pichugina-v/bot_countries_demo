@@ -45,7 +45,6 @@ class Cache:
         """
         Function creates or updates country cache
 
-        :param coordinates:
         :param country_data
 
         :return: None
