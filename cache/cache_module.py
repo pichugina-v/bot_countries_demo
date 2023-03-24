@@ -105,11 +105,11 @@ class Cache:
         """
         Get geocoder data from cache
 
-        :param city_name
+        :param country_name
 
-        :return:
+        :return: GeocoderSchema
         """
-        country_data = await redis.get(f'{PREFIX_CITY}{country_name}')
+        country_data = await redis.get(f'{PREFIX_COUNTRY}{country_name}')
         await redis.close()
         if country_data:
             return GeocoderSchema(**json.loads(country_data))
@@ -121,11 +121,10 @@ class Cache:
         """
         Function creates or updates city geocoder cache
 
-        :param city:
-        :param key:
+        :param country: GeocoderSchema
 
         :return: None
         """
-        key = f'{PREFIX_CITY}{country.name}'
+        key = f'{PREFIX_COUNTRY}{country.name}'
         await redis.set(key, json.dumps(country.dict()), TTL)
         await redis.close()

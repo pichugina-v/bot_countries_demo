@@ -283,7 +283,7 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         await City.objects.filter(country_id=data.iso_code, is_capital=True).aupdate(
-            name=data.capital
+            name=gettext(data.capital)
         )
 
 
