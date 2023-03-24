@@ -21,6 +21,7 @@ from aiogram_layer.src.messages import (
     CITY_NOT_FOUND,
     COUNTRY_INFO,
     COUNTRY_NOT_FOUND,
+    COUNTRY_UNAVAILABLE,
     CURRENCY_RATE_DETAIL,
     ENTER_CITY,
     ENTER_COUNTRY,
@@ -31,6 +32,7 @@ from aiogram_layer.src.messages import (
     START_MESSAGE,
     WEATHER_DETAIL,
     WEATHER_DETAIL_COUNTRY,
+    WEATHER_NOT_AVAILABLE,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
@@ -226,7 +228,10 @@ async def get_capital_weather(callback: types.CallbackQuery, state: FSMContext):
     :return: None
     """
     data = await state.get_data()
-    weather = await CountryService().get_capital_weather(data['country_info'])
+    async with CountryService() as uow:
+        weather = await uow.get_capital_weather(data['country_info'])
+    if not weather:
+        detail_text = WEATHER_NOT_AVAILABLE
     detail_text = WEATHER_DETAIL_COUNTRY.format(
         curr=weather.current_weather_temp,
         feels=weather.current_weather_temp_feels_like
@@ -250,15 +255,15 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     :return: None
     """
     data = await state.get_data()
-    detail = data['country_detail']
+    country_all_info = data['country_detail']
     return await callback.message.reply(
         text=COUNTRY_INFO.format(
-            country=detail.name,
-            capital=data['capital'].name,
-            population=detail.population,
-            area=detail.area_size,
-            languages=', '.join(str(language) for language in data['languages']),
-            currencies=', '.join(str(currency) for currency in data['currencies'].currency_codes)
+            country=country_all_info.detail.name,
+            capital=country_all_info.capital.name,
+            population=country_all_info.detail.population,
+            area=country_all_info.detail.area_size,
+            languages=', '.join(str(language) for language in country_all_info.languages.languages),
+            currencies=', '.join(str(currency) for currency in country_all_info.currencies.currency_codes),
         ),
         reply_markup=country_detail,
     )
@@ -277,7 +282,8 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     :return: None
     """
     data = await state.get_data()
-    currency_info = await CountryService().get_currency_rates(data['currencies'])
+    async with CountryService() as uow:
+        currency_info = await uow.get_currency_rates(data['country_detail'].currencies)
     if not currency_info:
         return await callback.message.reply(
             text=NON_TRADING_CURRENCY,
@@ -353,31 +359,31 @@ async def process_country_name(message: types.Message, state: FSMContext):
     :param message: arg1
     :return: None
     """
-    info = await CountryService().get_country_info(message.text)
-    if not info:
-        return await message.reply(
-            text=COUNTRY_NOT_FOUND,
-            reply_markup=to_main_menu,
-        )
-    detail = await CountryService().get_country(info)
-    capital = await CountryService().get_capital_info(info)
-    languages = await CountryService().get_languages(info)
-    currencies = await CountryService().get_currencies(info)
+    async with CountryService() as uow:
+        info = await uow.get_country_info(message.text)
+        if not info:
+            return await message.reply(
+                text=COUNTRY_NOT_FOUND,
+                reply_markup=to_main_menu,
+            )
+        country_all_info = await uow.get_country_all_info(info)
+        if not country_all_info:
+            return await message.reply(
+                text=COUNTRY_UNAVAILABLE,
+                reply_markup=to_main_menu,
+            )
     await state.update_data(
         country_info=info,
-        country_detail=detail,
-        capital=capital,
-        languages=languages.languages,
-        currencies=currencies,
+        country_detail=country_all_info
     )
     return await message.reply(
         text=COUNTRY_INFO.format(
-            country=detail.name,
-            capital=capital.name,
-            population=detail.population,
-            area=detail.area_size,
-            languages=', '.join(str(language) for language in languages.languages),
-            currencies=', '.join(str(currency) for currency in currencies.currency_codes),
+            country=country_all_info.detail.name,
+            capital=country_all_info.capital.name,
+            population=country_all_info.detail.population,
+            area=country_all_info.detail.area_size,
+            languages=', '.join(str(language) for language in country_all_info.languages.languages),
+            currencies=', '.join(str(currency) for currency in country_all_info.currencies.currency_codes),
         ),
         reply_markup=country_detail,
     )
