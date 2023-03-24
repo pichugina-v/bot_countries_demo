@@ -1,12 +1,25 @@
 from django.db import models
+from django.utils import translation
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
+
+
+class CustomManager(models.Manager):
+    async def abulk_create(self, objs, **kwargs):
+        translation.activate('ru')
+        for obj in objs:
+            val = getattr(obj, 'name', False)
+            setattr(obj, 'name', gettext(val))
+        translation.deactivate()
+        created = await super().abulk_create(objs, **kwargs)
+        return created
 
 
 class City(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('name'))
     country = models.ForeignKey('Country', on_delete=models.PROTECT, verbose_name=_('country'), related_name='cities')
-    longitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('longitude'))
-    latitude = models.DecimalField(max_digits=7, decimal_places=4, verbose_name=_('latitude'))
+    longitude = models.FloatField(verbose_name=_('longitude'))
+    latitude = models.FloatField(verbose_name=_('latitude'))
     is_capital = models.BooleanField()
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
 
@@ -40,6 +53,7 @@ class Language(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('name'), unique=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
     country = models.ManyToManyField('Country', related_name='languages')
+    objects = CustomManager()
 
     class Meta:
         verbose_name = _('language')

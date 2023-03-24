@@ -16,27 +16,44 @@ ENTER_CITY = '''
 ENTER_COUNTRY = '''
 Введите название страны:
 '''
-COUNTRY_INFO = '''
+CITY_INFO = '''
 Информация о стране, где расположен город {city}
 '''
-COUNTRY_INFO_NAME = '''
-Информация о стране {country}
+COUNTRY_INFO = '''
+Информация о стране {country}:
+Столица {capital}
+Население составляет {population}
+Площадь территории составляет {area}
+Государственный язык: {languages}
+Госудаственная валюта: {currencies}
+'''
+CITY_INFO = '''
+Информация о городe: {city}
+'''
+CITY_NOT_FOUND = '''
+Город с таким названием не найден
 '''
 WEATHER_DETAIL = '''
-Погода в выбранном городе
+Погода в городе {city}:
+Температура: {temperature}
+Ощущается как: {feels_like}
 '''
 WEATHER_DETAIL_COUNTRY = '''
-Погода в столице
-'''
-COUNTRY_DETAIL = '''
-Подробнее о стране
+Погода в столице {curr}
+Ощущается, как {feels}
 '''
 CURRENCY_RATE_DETAIL = '''
-Курс валюты в стране
+Курс валют к рублю: {currency_details}
 '''
 INVALID_CITY = '''
 Неверное название города. Попробуйте еще раз
 '''
 INVALID_COUNTRY = '''
 Неверное название страны. Попробуйте еще раз
+'''
+COUNTRY_NOT_FOUND = '''
+Такая страна не найдена. Попробуйте еще раз
+'''
+NON_TRADING_CURRENCY = '''
+Валюта страны не торгуется к рублю
 '''

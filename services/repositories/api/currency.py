@@ -4,7 +4,7 @@ from http import HTTPStatus
 from aiohttp import ClientResponse, ClientSession
 
 from services.repositories.api.abstract_api_repository import AbstractAPIRepository
-from services.repositories.api.api_schemas import AllRateSchema, CurrencySchema
+from services.repositories.api.api_schemas import CurrencySchema
 from services.repositories.api.api_settings import CURRENCY_INFO_URL
 
 
@@ -13,21 +13,9 @@ class CurrencyAPIRepository(AbstractAPIRepository):
     This class is a repository for making requests in currency API.
     """
 
-    async def get_all_rate(self):
-        """
-        The function returns the full list of currencies and their values
-
-        :return AllRateSchema or None
-        """
-        response = await self._send_request(url=CURRENCY_INFO_URL)
-        if response.status == HTTPStatus.OK:
-            currencies = await self._parse_response(response)
-            return AllRateSchema(all_rate={key: value.value for key, value in currencies.items()})
-        return None
-
     async def get_rate(self, char_codes: list[str]) -> list[CurrencySchema] | None:
         """
-        Return current currency rate for received currency code.
+        The function returns the full list of currencies and their values
 
         :param char_codes: list of currency codes like ["USD", "EUR"]
 

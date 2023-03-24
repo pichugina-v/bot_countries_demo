@@ -1,20 +1,20 @@
 from dataclasses import dataclass
-from typing import Any
 
-from cache.cache_module import Cache, CacheDTO
-from django_layer.countries_app.models import Country
-from services.repositories.api.api_schemas import WeatherSchema
+from cache.cache_module import Cache
+from services.repositories.api.api_schemas import GeocoderSchema
 from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository
-from services.repositories.db.countries import CountryDBRepository, LanguageDBSchema
+from services.repositories.db.countries import CountryDBRepository
+from services.repositories.db.schemas import CurrencyCodesSchema, LanguageNamesSchema
+from services.service_schemas import CityCoordinatesSchema
 
 
 @dataclass
 class CountryService:
     """
-    This is a class of a Country Service. Provides operations for retrieving information about countries.
+    Class for get info about country from cache, database or api repositories.
     """
     cache: Cache = Cache()
     geocoder: GeocoderAPIRepository = GeocoderAPIRepository()
@@ -23,102 +23,70 @@ class CountryService:
     currency_repo: CurrencyAPIRepository = CurrencyAPIRepository()
     crud: CountryDBRepository = CountryDBRepository()
 
-    async def get_country(self, name: str) -> CacheDTO | Country | None:
-        """
-        Get info about country from cache, then db, then api repositories if exists.
-
-        :param name: country name
-
-        :return: information about country or None
-        """
-        country_info = await self.geocoder.get_base_info(name)
+    async def get_country_info(self, country_name: str):
+        country_info = await self.geocoder.get_country(country_name)
         if not country_info:
             return None
-        cache_country = await self.cache.get(country_info.coordinates)
+        return country_info
+
+    async def get_country(self, country_info: GeocoderSchema):
+        cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return cache_country
-        db_country = await self.crud.get_by_name(name=country_info.name)
-        if db_country is None:
-            db_country = await self.crud.get_by_pk(country_info.country_code)
-            if db_country is None:
-                country = await self.countries_repo.get_country_detail(country_info.country_code)
-                db_country = await self.crud.create(country)
+        db_country = await self.crud.get_by_name(country_info.name)
+        if not db_country:
+            country = await self.countries_repo.get_country_detail(country_info.country_code)
+            db_country = await self._create_db_and_cache_country(country, country_info.coordinates)
         return db_country
 
-    async def _get_db_country(self, name: str) -> Country | None:
-        """
-        Retrieves country object from database by name or requests iso_code from api
-        and retrieves country object from database by iso_code.
+    async def get_languages(self, country_info: GeocoderSchema):
+        cache_country = await self.cache.get_country(country_info.coordinates)
+        if cache_country:
+            return LanguageNamesSchema(languages=cache_country.languages)
+        languages = await self.crud.get_country_languages(country_info.country_code)
+        if not languages:
+            country = await self.countries_repo.get_country_detail(country_info.country_code)
+            await self._create_db_and_cache_country(country, country_info.coordinates)
+            languages = await self.crud.get_country_languages(country_info.country_code)
+        return languages
 
-        :param name: country name
+    async def get_currencies(self, country_info: GeocoderSchema):
+        cache_country = await self.cache.get_country(country_info.coordinates)
+        if cache_country:
+            return CurrencyCodesSchema(currency_codes=[currency for currency in cache_country.currencies.keys()])
+        currencies = await self.crud.get_country_currencies(country_info.country_code)
+        if not currencies:
+            country = await self.countries_repo.get_country_detail(country_info.country_code)
+            await self._create_db_and_cache_country(country, country_info.coordinates)
+            currencies = await self.crud.get_country_currencies(country_info.country_code)
+        return currencies
 
-        :return: information about country or None
-        """
-        db_country = await self.crud.get_by_name(name)
-        if db_country is None:
-            country_info = await self.geocoder.get_base_info(name)
-            db_country = await self.crud.get_by_pk(country_info.country_code)
-            if db_country is None:
-                return None
+    async def get_currency_rates(self, currencies: CurrencyCodesSchema):
+        return await self.currency_repo.get_rate(currencies.currency_codes)
+
+    async def get_capital_weather(self, country_info: GeocoderSchema):
+        city = await self.get_capital_info(country_info)
+        return await self.weather_repo.get_weather(city.latitude, city.longitude)
+
+    async def get_capital_info(self, country_info: GeocoderSchema):
+        cache_country = await self.cache.get_country(country_info.coordinates)
+        if cache_country:
+            return CityCoordinatesSchema(
+                name=cache_country.capital,
+                latitude=cache_country.capital_latitude,
+                longitude=cache_country.capital_longitude,
+            )
+        city = await self.crud.get_capital(country_info.country_code)
+        if city:
+            return CityCoordinatesSchema(
+                name=city.name,
+                latitude=city.latitude,
+                longitude=city.longitude,
+            )
+        return None
+
+    async def _create_db_and_cache_country(self, country, coordinates):
+        db_country = await self.crud.create(country)
+        updated_country = await self.crud.update_country_schema(country, db_country)
+        await self.cache.create_or_update_country(coordinates, updated_country)
         return db_country
-
-    async def get_capital_info(self, name: str) -> tuple[Any, Any, Any] | None:
-        """
-        Retrieves city object from database by country name
-
-        :param name: country name
-
-        :return: name, longitude and latitude of a capital city
-        """
-        db_country = await self._get_db_country(name)
-        if db_country is not None:
-            city = await self.crud.get_city_by_country_pk(db_country.iso_code)
-            if city:
-                return city.longitude, city.latitude, city.name
-        return None
-
-    async def get_capital_weather(self, latitude: float, longitude: float) -> WeatherSchema | None:
-        """
-        Returns information about current weather in the country capital
-
-        :param latutide: capital latitude
-        :param longitude: capital longitude
-
-        :return: information about current weather in the capital city
-        """
-        weather = await self.weather_repo.get_weather(latitude, longitude)
-        return weather
-
-    async def get_languages(self, name: str) -> LanguageDBSchema | None:
-        """
-        Retrieves language records from database by country name
-
-        :param name: country name
-
-        :return: language records
-        """
-        db_country = await self._get_db_country(name)
-        if db_country is not None:
-            languages = await self.crud.get_country_language(db_country.iso_code)
-            return languages
-        return None
-
-    async def get_currency(self, name: str) -> list[float] | None:
-        """
-        Returns information about currency of the country
-
-        :param name: country name
-
-        :return: information about currency
-        """
-        db_country = await self._get_db_country(name)
-        if db_country is not None:
-            currencies = await self.crud.get_country_currency(db_country.iso_code)
-            if currencies is not None:
-                currencies_info = []
-                for currency_code in currencies.currency_codes:
-                    currency = await self.currency_repo.get_rate(currency_code)
-                    if currency is not None:
-                        currencies_info.append(currency)
-                return currencies_info
-        return None

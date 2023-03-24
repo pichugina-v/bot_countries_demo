@@ -3,7 +3,7 @@ from services.repositories.api.api_schemas import CitySchema
 from services.repositories.db.abstract_db_repository import AbstractDBRepository
 
 
-class CityBDRerpository(AbstractDBRepository):
+class CityBDRepository(AbstractDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
     Supported methods: create, update, get_by_pk, get_by_name.
@@ -15,12 +15,12 @@ class CityBDRerpository(AbstractDBRepository):
         Looking for city record with requested id.
         Returns a city record from City table.
 
-        :param city_id: city identificator
+        :param city_id: city database identificator
 
         :return: city record from City tables
         """
         try:
-            city = await City.objects.aget(id=city_id)
+            city = await City.objects.select_related('country').aget(id=city_id)
             return city
         except City.DoesNotExist:
             return None
@@ -35,7 +35,7 @@ class CityBDRerpository(AbstractDBRepository):
         :return: city record from City table.
         """
         try:
-            city = await City.objects.aget(name=city_name)
+            city = await City.objects.select_related('country').aget(name=city_name)
             return city
         except City.DoesNotExist:
             return None
@@ -62,7 +62,7 @@ class CityBDRerpository(AbstractDBRepository):
         Update a city record in City table
 
         :param city_id: city database identificator
-        :param new_name: new city name to update
+        :param data: city attributes to update
 
         :return: updated city record from City table
         """
@@ -77,10 +77,10 @@ class CityBDRerpository(AbstractDBRepository):
         return updated_city
 
 
-def get_cities_repository() -> CityBDRerpository:
+def get_cities_repository() -> CityBDRepository:
     """
     Returns object of :class:`CitiesRerpository` class
 
     return: :class:`CitiesRerpository` object
     """
-    return CityBDRerpository()
+    return CityBDRepository()
