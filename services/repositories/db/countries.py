@@ -193,6 +193,9 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         await sync_to_async(country.languages.clear)()
+        translation.activate('ru')
+        languages = [gettext(language) for language in languages]
+        translation.deactivate()
         await self._set_languages(languages, country)
 
     async def _update_currencies(self, currencies: dict, country: Country) -> None:
