@@ -24,16 +24,19 @@ class CountryService:
     crud: CountryDBRepository = CountryDBRepository()
 
     async def get_country_info(self, country_name: str):
+        country_cache = await self.cache.get_country_by_name(country_name)
+        if country_cache:
+            return country_cache
         country_info = await self.geocoder.get_country(country_name)
-        if not country_info:
-            return None
-        return country_info
+        if country_info:
+            await self.cache.set_country_geocoder(country_info)
+            return country_info
 
     async def get_country(self, country_info: GeocoderSchema):
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return cache_country
-        db_country = await self.crud.get_by_name(country_info.name)
+        db_country = await self.crud.get_by_name(name=country_info.name)
         if not db_country:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             db_country = await self._create_db_and_cache_country(country, country_info.coordinates)
@@ -47,7 +50,6 @@ class CountryService:
         if not languages:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             await self._create_db_and_cache_country(country, country_info.coordinates)
-            languages = await self.crud.get_country_languages(country_info.country_code)
         return languages
 
     async def get_currencies(self, country_info: GeocoderSchema):
@@ -58,7 +60,6 @@ class CountryService:
         if not currencies:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             await self._create_db_and_cache_country(country, country_info.coordinates)
-            currencies = await self.crud.get_country_currencies(country_info.country_code)
         return currencies
 
     async def get_currency_rates(self, currencies: CurrencyCodesSchema):
