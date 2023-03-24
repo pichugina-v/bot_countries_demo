@@ -99,3 +99,33 @@ class Cache:
         key = f'{PREFIX_CITY}{city.name}'
         await redis.set(key, json.dumps(city.dict()), TTL)
         await redis.close()
+
+    @staticmethod
+    async def get_country_by_name(country_name: str) -> GeocoderSchema | None:
+        """
+        Get geocoder data from cache
+
+        :param city_name
+
+        :return:
+        """
+        country_data = await redis.get(f'{PREFIX_CITY}{country_name}')
+        await redis.close()
+        if country_data:
+            return GeocoderSchema(**json.loads(country_data))
+
+        return None
+
+    @staticmethod
+    async def set_country_geocoder(country: GeocoderSchema) -> None:
+        """
+        Function creates or updates city geocoder cache
+
+        :param city:
+        :param key:
+
+        :return: None
+        """
+        key = f'{PREFIX_CITY}{country.name}'
+        await redis.set(key, json.dumps(country.dict()), TTL)
+        await redis.close()

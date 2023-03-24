@@ -33,21 +33,20 @@ class CountryService:
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return cache_country
-        db_country = await self.crud.get_by_name(name=country_info.name)
+        db_country = await self.crud.get_by_name(country_info.name)
         if not db_country:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
-            db_country = await self.crud.create(country)
-            await self.cache.create_or_update_country(country_info.coordinates, country)
+            db_country = await self._create_db_and_cache_country(country, country_info.coordinates)
         return db_country
 
-    async def get_languages(self, country_info: GeocoderSchema):    # положить локализованные языки в кэш
+    async def get_languages(self, country_info: GeocoderSchema):
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return LanguageNamesSchema(languages=cache_country.languages)
         languages = await self.crud.get_country_languages(country_info.country_code)
         if not languages:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
-            await self.crud.create(country)
+            await self._create_db_and_cache_country(country, country_info.coordinates)
             languages = await self.crud.get_country_languages(country_info.country_code)
         return languages
 
@@ -58,7 +57,7 @@ class CountryService:
         currencies = await self.crud.get_country_currencies(country_info.country_code)
         if not currencies:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
-            await self.crud.create(country)
+            await self._create_db_and_cache_country(country, country_info.coordinates)
             currencies = await self.crud.get_country_currencies(country_info.country_code)
         return currencies
 
@@ -85,3 +84,9 @@ class CountryService:
                 longitude=city.longitude,
             )
         return None
+
+    async def _create_db_and_cache_country(self, country, coordinates):
+        db_country = await self.crud.create(country)
+        updated_country = await self.crud.update_country_schema(country, db_country)
+        await self.cache.create_or_update_country(coordinates, updated_country)
+        return db_country

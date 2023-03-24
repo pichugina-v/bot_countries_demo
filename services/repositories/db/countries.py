@@ -1,4 +1,6 @@
 from asgiref.sync import sync_to_async
+from django.utils import translation
+from django.utils.translation import gettext
 
 from django_layer.countries_app.models import City, Country, Currency, Language
 from services.repositories.api.country_detail import CountrySchema
@@ -98,6 +100,18 @@ class CountryDBRepository(AbstractDBRepository):
         except City.DoesNotExist:
             return None
 
+    async def update_country_schema(self, country: CountrySchema, db_country: Country) -> CountrySchema:
+        """
+        Updates CountrySchema with locallased languages of country, created in database.
+
+        :param country: CountrySchema
+        param db_country: Country object
+
+        :return: CountrySchema
+        """
+        country.languages = [language.name async for language in await sync_to_async(db_country.languages.all)()]
+        return country
+
     async def get_country_currencies(self, country_pk: str) -> CurrencyCodesSchema | None:
         """
         Looking for all currency records with requested country pk.
@@ -137,6 +151,9 @@ class CountryDBRepository(AbstractDBRepository):
 
         :return: None
         """
+        translation.activate('ru')
+        languages = [gettext(language) for language in languages]
+        translation.deactivate()
         filtered_languages = await sync_to_async(Language.objects.filter)(name__in=languages)
         existing_languages = [language async for language in await sync_to_async(filtered_languages.all)()]
         languages = [
