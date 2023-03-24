@@ -49,6 +49,7 @@ class Cache:
         """
         Function creates or updates country cache
 
+        :param coordinates:
         :param country_data
 
         :return: None
@@ -71,33 +72,44 @@ class Cache:
         await redis.close()
 
     @staticmethod
-    async def get_city_by_name(city_name: str) -> GeocoderSchema | None:
+    async def get_city_geocoder(city_name: str) -> GeocoderSchema | list[GeocoderSchema] | None:
         """
         Get geocoder data from cache
 
-        :param city_name
+        :param: city_name
 
         :return:
         """
-        city_data = await redis.get(f'{PREFIX_CITY}{city_name}')
+        key = f'{PREFIX_CITY}{city_name}'
+        cache_data = await redis.get(key)
         await redis.close()
-        if city_data:
-            return GeocoderSchema(**json.loads(city_data))
+        if not cache_data:
+            return None
+        city_data = json.loads(cache_data)
+        if isinstance(city_data, list):
+            for city in city_data:
+                GeocoderSchema.parse_obj(city)
+            return [GeocoderSchema.parse_obj(city) for city in city_data]
 
-        return None
+        return GeocoderSchema.parse_obj(city_data)
 
     @staticmethod
-    async def set_city_geocoder(city: GeocoderSchema) -> None:
+    async def set_city_geocoder(city_schema: GeocoderSchema | list[GeocoderSchema]) -> None:
         """
         Function creates or updates city geocoder cache
 
-        :param city:
-        :param key:
+        :param city_schema:
 
         :return: None
         """
-        key = f'{PREFIX_CITY}{city.name}'
-        await redis.set(key, json.dumps(city.dict()), TTL)
+        if isinstance(city_schema, list):
+            city_name = city_schema[0].name
+            data = [city.dict() for city in city_schema]
+        else:
+            city_name = city_schema.name
+            data = city_schema.dict()
+        key = f'{PREFIX_CITY}{city_name}'
+        await redis.set(key, json.dumps(data), TTL)
         await redis.close()
 
     @staticmethod
