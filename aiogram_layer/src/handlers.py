@@ -6,6 +6,7 @@ from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
 from aiogram_layer.src.callbacks import CitiesCB
 from aiogram_layer.src.keyboards import (
+    city_detail,
     country_detail,
     create_cities_list_markup,
     currency_detail,
@@ -135,37 +136,48 @@ async def process_city_name(message: types.Message, state: FSMContext):
 
     await message.answer(
         text=CITY_INFO.format(city=city_info.name),
-        reply_markup=country_detail
+        reply_markup=city_detail
     )
-    currencies = await CountryService().get_currencies(city_info)
-    # detail = await CountryService().get_country(city_info)
-    await state.update_data(
-        coordinates=city_info.coordinates,
-        country_code=city_info.country_code,
-        search_type=city_info.search_type,
-        name=city_info.name,
-        currencies=currencies,
-        # detail=detail,
-    )
+    async with CountryService() as uow:
+        detail = await uow.get_country(city_info)
+        capital = await uow.get_capital_info(city_info)
+        languages = await uow.get_languages(city_info)
+        currencies = await uow.get_currencies(city_info)
+        await state.update_data(
+            coordinates=city_info.coordinates,
+            country_code=city_info.country_code,
+            search_type=city_info.search_type,
+            name=city_info.name,
+            currencies=currencies,
+            country_detail=detail,
+            capital=capital,
+            languages=languages.languages,
+        )
 
 
 @dp.callback_query(CitiesCB.filter(), Form.city_search)
 async def choose_city_from_list(callback: types.CallbackQuery, callback_data: CitiesCB, state: FSMContext):
     data = await state.get_data()
     city_info = data[callback_data.coordinates]
-    currencies = await CountryService().get_currencies(city_info)
-    # detail = await CountryService().get_country(city_info)
-    await state.update_data(
-        coordinates=city_info.coordinates,
-        country_code=city_info.country_code,
-        search_type=city_info.search_type,
-        name=city_info.name,
-        currencies=currencies,
-        # detail=detail,
-    )
+    async with CountryService() as uow:
+        detail = await uow.get_country(city_info)
+        capital = await uow.get_capital_info(city_info)
+        languages = await uow.get_languages(city_info)
+        currencies = await uow.get_currencies(city_info)
+        await state.update_data(
+            coordinates=city_info.coordinates,
+            country_code=city_info.country_code,
+            search_type=city_info.search_type,
+            name=city_info.name,
+            currencies=currencies,
+            country_detail=detail,
+            capital=capital,
+            languages=languages.languages,
+
+        )
     return await callback.message.answer(
         text=CITY_INFO.format(city=city_info.name.capitalize()),
-        reply_markup=country_detail
+        reply_markup=city_detail
     )
 
 

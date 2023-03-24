@@ -25,6 +25,14 @@ country_detail = InlineKeyboardMarkup(
         [Buttons.to_main_menu.value],
     ]
 )
+city_detail = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [Buttons.weather.value],
+        [Buttons.currency.value],
+        [Buttons.country.value],
+        [Buttons.to_main_menu.value],
+    ]
+)
 currency_detail = InlineKeyboardMarkup(
     inline_keyboard=[
         [Buttons.weather.value],
