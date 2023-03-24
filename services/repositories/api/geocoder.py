@@ -1,4 +1,4 @@
-import asyncio
+# import asyncio
 import json
 from typing import Optional
 
@@ -175,5 +175,5 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         return None
 
 
-g = GeocoderAPIRepository()
-print(asyncio.run(g.get_city('будапешт')))
+# g = GeocoderAPIRepository()
+# print(asyncio.run(g.get_city('будапешт')))
