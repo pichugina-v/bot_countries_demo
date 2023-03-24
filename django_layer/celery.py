@@ -9,8 +9,8 @@ app = Celery('django_layer')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 app.conf.beat_schedule = {
-    'sample_task': {
-        'task': 'tasks.tasks.sample_task',
+    'update_cache': {
+        'task': 'tasks.tasks.run_update_cache',
         'schedule': crontab(minute='*/1')
     },
 }

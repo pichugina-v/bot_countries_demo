@@ -15,7 +15,7 @@ class CurrencyAPIRepository(AbstractAPIRepository):
 
     async def get_rate(self, char_codes: list[str]) -> list[CurrencySchema] | None:
         """
-        Return current currency rate for received currency code.
+        The function returns the full list of currencies and their values
 
         :param char_codes: list of currency codes like ["USD", "EUR"]
 

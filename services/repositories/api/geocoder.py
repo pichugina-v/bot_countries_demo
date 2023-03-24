@@ -1,3 +1,4 @@
+# import asyncio
 import json
 from typing import Optional
 
@@ -140,7 +141,7 @@ class GeocoderAPIRepository(AbstractAPIRepository):
         return GeocoderSchema(coordinates=coordinates, country_code=country_code,
                               search_type=search_type, full_address=full_address, name=right_name)
 
-    async def parse_many_result(self, right_name: str, main_data: dict) -> list[GeocoderSchema] | None:
+    async def parse_many_result(self, right_name: str, main_data: dict) -> GeocoderSchema | list[GeocoderSchema] | None:
         """
         Function handles many results.
 
@@ -168,5 +169,11 @@ class GeocoderAPIRepository(AbstractAPIRepository):
             except KeyError:
                 pass
         if geocoder_schema_list:
-            return geocoder_schema_list
+            if len(geocoder_schema_list) > 1:
+                return geocoder_schema_list
+            return geocoder_schema_list[0]
         return None
+
+
+# g = GeocoderAPIRepository()
+# print(asyncio.run(g.get_city('будапешт')))
