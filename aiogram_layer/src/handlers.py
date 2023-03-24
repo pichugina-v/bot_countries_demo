@@ -1,13 +1,13 @@
 from aiogram import types
 from aiogram.filters import Command, Text
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
 from aiogram_layer.src.callbacks import CitiesCB
 from aiogram_layer.src.keyboards import (
     country_detail,
+    create_cities_list_markup,
     currency_detail,
     main_menu,
     to_main_menu,
@@ -15,6 +15,7 @@ from aiogram_layer.src.keyboards import (
 )
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
+    CITIES_LIST,
     CITY_INFO,
     CITY_NOT_FOUND,
     COUNTRY_INFO,
@@ -34,7 +35,6 @@ from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 from services.city_service import CityService
 from services.country_service import CountryService
-from services.repositories.api.api_schemas import GeocoderSchema
 
 
 @dp.message(Command('start', 'help'))
@@ -122,14 +122,12 @@ async def process_city_name(message: types.Message, state: FSMContext):
         )
 
     if isinstance(city_info, list):
-        builder = InlineKeyboardBuilder()
-        for city in city_info:
-            city: GeocoderSchema
-            builder.button(text=city.full_address, callback_data=CitiesCB(coordinates=city.coordinates))
+        builder = await create_cities_list_markup(city_info)
+
         await state.update_data(data={city.coordinates: city for city in city_info})
 
         return await message.answer(
-            text='По указанному названию нашлось несколько вариантов:',
+            text=CITIES_LIST,
             reply_markup=builder.as_markup()
         )
 
@@ -138,12 +136,14 @@ async def process_city_name(message: types.Message, state: FSMContext):
         reply_markup=country_detail
     )
     currencies = await CountryService().get_currencies(city_info)
+    # detail = await CountryService().get_country(city_info)
     await state.update_data(
         coordinates=city_info.coordinates,
         country_code=city_info.country_code,
         search_type=city_info.search_type,
         name=city_info.name,
         currencies=currencies,
+        # detail=detail,
     )
 
 
@@ -152,12 +152,14 @@ async def choose_city_from_list(callback: types.CallbackQuery, callback_data: Ci
     data = await state.get_data()
     city_info = data[callback_data.coordinates]
     currencies = await CountryService().get_currencies(city_info)
+    # detail = await CountryService().get_country(city_info)
     await state.update_data(
         coordinates=city_info.coordinates,
         country_code=city_info.country_code,
         search_type=city_info.search_type,
         name=city_info.name,
         currencies=currencies,
+        # detail=detail,
     )
     return await callback.message.answer(
         text=CITY_INFO.format(city=city_info.name.capitalize()),
@@ -189,7 +191,7 @@ async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
                                         temperature=weather.current_weather_temp,
                                         city=name)
 
-    await callback.message.answer(
+    return await callback.message.answer(
         text=detail_text,
         reply_markup=weather_detail,
     )
@@ -219,7 +221,7 @@ async def get_capital_weather(callback: types.CallbackQuery, state: FSMContext):
     )
     return await callback.message.reply(
         text=detail_text,
-        reply_markup=weather_detail
+        reply_markup=weather_detail,
     )
 
 
@@ -246,7 +248,7 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
             languages=', '.join(str(language) for language in data['languages']),
             currencies=', '.join(str(currency) for currency in data['currencies'].currency_codes)
         ),
-        reply_markup=country_detail
+        reply_markup=country_detail,
     )
 
 
@@ -267,13 +269,13 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     if not currency_info:
         return await callback.message.reply(
             text=NON_TRADING_CURRENCY,
-            reply_markup=currency_detail
+            reply_markup=currency_detail,
         )
     for currency in currency_info:
         currency_details = f'{str(currency.name)} - {str(currency.value)}'
     return await callback.message.reply(
         text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
-        reply_markup=currency_detail
+        reply_markup=currency_detail,
     )
 
 
@@ -312,7 +314,7 @@ async def enter_country_name(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.country_search)
     return await callback.message.reply(
         text=ENTER_COUNTRY,
-        reply_markup=to_main_menu
+        reply_markup=to_main_menu,
     )
 
 
@@ -343,7 +345,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
     if not info:
         return await message.reply(
             text=COUNTRY_NOT_FOUND,
-            reply_markup=to_main_menu
+            reply_markup=to_main_menu,
         )
     detail = await CountryService().get_country(info)
     capital = await CountryService().get_capital_info(info)
@@ -354,7 +356,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
         country_detail=detail,
         capital=capital,
         languages=languages.languages,
-        currencies=currencies
+        currencies=currencies,
     )
     return await message.reply(
         text=COUNTRY_INFO.format(
@@ -363,7 +365,7 @@ async def process_country_name(message: types.Message, state: FSMContext):
             population=detail.population,
             area=detail.area_size,
             languages=', '.join(str(language) for language in languages.languages),
-            currencies=', '.join(str(currency) for currency in currencies.currency_codes)
+            currencies=', '.join(str(currency) for currency in currencies.currency_codes),
         ),
-        reply_markup=country_detail
+        reply_markup=country_detail,
     )
