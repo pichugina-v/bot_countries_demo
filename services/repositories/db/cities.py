@@ -3,7 +3,7 @@ from services.repositories.api.api_schemas import CitySchema
 from services.repositories.db.abstract_db_repository import AbstractDBRepository
 
 
-class CityBDRerpository(AbstractDBRepository):
+class CityBDRepository(AbstractDBRepository):
     """
     This is a class of a CitiesRepository repository. Provides CRUD operations for City entity.
     Supported methods: create, update, get_by_pk, get_by_name.
@@ -77,10 +77,10 @@ class CityBDRerpository(AbstractDBRepository):
         return updated_city
 
 
-def get_cities_repository() -> CityBDRerpository:
+def get_cities_repository() -> CityBDRepository:
     """
     Returns object of :class:`CitiesRerpository` class
 
     return: :class:`CitiesRerpository` object
     """
-    return CityBDRerpository()
+    return CityBDRepository()

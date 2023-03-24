@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from pprint import pprint
 
 from aiohttp import ClientResponse, ClientSession
 

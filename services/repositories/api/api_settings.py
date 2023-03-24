@@ -14,4 +14,5 @@ WEATHER_INFO_URL = os.environ['WEATHER_INFO_URL']
 CURRENCY_INFO_URL = os.environ['CURRENCY_INFO_URL']
 
 COUNTRY = 'country'
-CITY = ('province', 'locality')
+SEARCH_TYPE_LIST = ['province', 'locality']
+YANDEX_TAG_LIST = ['<fix>', '</fix>']

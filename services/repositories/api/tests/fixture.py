@@ -4,7 +4,10 @@ from http import HTTPStatus
 import pytest_asyncio
 from pytest import MonkeyPatch
 
+from services.repositories.api.api_schemas import GeocoderSchema
+from services.repositories.api.country_detail import CountryAPIRepository
 from services.repositories.api.currency import CurrencyAPIRepository
+from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.tests.mocks import MockClientResponse
 from services.repositories.api.weather import WeatherAPIRepository
 
@@ -106,4 +109,362 @@ def weather_api_response() -> dict:
                      'id': 804,
                      'main': 'Clouds'}],
         'wind': {'deg': 12, 'gust': 10.4, 'speed': 4.28}
+    }
+
+
+@pytest_asyncio.fixture
+async def patched_country_api_repository(monkeypatch: MonkeyPatch, country_api_response: list):
+    """
+    This fixture for override _send_request method
+
+    :param monkeypatch: fixture for monkey-patching
+    :param currency_api_response: normal response from country API
+
+    :return: patched CountryAPIRepository
+    """
+    async def return_mock(*args, **kwargs):
+        return MockClientResponse(json.dumps(country_api_response), HTTPStatus.OK)
+
+    country_api_repository = CountryAPIRepository()
+    monkeypatch.setattr(country_api_repository, '_send_request', return_mock)
+
+    yield country_api_repository
+
+
+@pytest_asyncio.fixture
+async def country_api_response() -> list:
+    return [
+        {
+            'name': {
+                'common': 'Russia',
+                'official': 'Ressuian Federation',
+                'native_name': {
+                    'rus': {
+                        'official': 'Российская Федерация',
+                        'common': 'Россия'
+                    }
+                }
+            },
+            'cca2': 'RU',
+            'ccn3': '643',
+            'cca3': 'RUS',
+            'cioc': 'RUS',
+            'independent': True,
+            'status': 'officially-assigned',
+            'currencies': {
+                'RUB': {
+                    'name': 'Russian ruble',
+                    'symbol': '₽'
+                },
+            },
+            'capital': ['Moscow'],
+            'region': 'Europe',
+            'subregion': 'Eastern Europe',
+            'languages': {'rus': 'Russian'},
+            'translations': {
+                'rus': {
+                    'official': 'Российская Федерация',
+                    'common': 'Росcия'
+                },
+            },
+            'area': 17098242.0,
+            'population': 144104080,
+            'capitalInfo': {
+                'latlng': [55.75, 37.6]
+            },
+        }
+    ]
+
+
+@pytest_asyncio.fixture
+async def patched_geocoder_api_repository_for_country(
+    monkeypatch: MonkeyPatch,
+    geocoder_api_country_response: dict
+):
+    """
+    This fixture for override _send_request method
+
+    :param monkeypatch: fixture for monkey-patching
+    :param geocoder_api_country_response: expected country response from geocoder API
+
+    :return: patched GeocoderAPIRepository
+    """
+    async def return_mock(*args, **kwargs):
+        return MockClientResponse(json.dumps(geocoder_api_country_response), HTTPStatus.OK)
+
+    geocoder_api_repository = GeocoderAPIRepository()
+    monkeypatch.setattr(geocoder_api_repository, '_send_request', return_mock)
+
+    yield geocoder_api_repository
+
+
+@pytest_asyncio.fixture
+async def geocoder_api_country_response() -> dict:
+    return {
+        'response': {
+            'GeoObjectCollection': {
+                'metaDataProperty': {
+                    'GeocoderResponseMetaData': {
+                        'request': 'Росия',
+                        'results': '1',
+                        'suggest': 'Ро<fix>сс</fix>ия',
+                        'found': '1'
+                    }
+                },
+                'featureMember': [
+                    {
+                        'GeoObject': {
+                            'metaDataProperty': {
+                                'GeocoderMetaData': {
+                                    'precision': 'other',
+                                    'text': 'Россия',
+                                    'kind': 'country',
+                                    'Address': {
+                                        'country_code': 'RU',
+                                        'formatted': 'Россия',
+                                        'Components': [
+                                            {'kind': 'country',
+                                             'name': 'Россия'}
+                                        ]
+                                    },
+                                    'AddressDetails': {
+                                        'Country': {'AddressLine': 'Россия',
+                                                    'CountryNameCode': 'RU',
+                                                    'CountryName': 'Россия'}
+                                    }
+                                }
+                            },
+                            'name': 'Россия',
+                            'boundedBy': {
+                                'Envelope': {'lowerCorner': '19.484764 41.185996',
+                                             'upperCorner': '191.128012 81.886117'}
+                            },
+                            'Point': {
+                                'pos': '99.505405 61.698657'
+                            }}}]}}}
+
+
+@pytest_asyncio.fixture
+async def expected_geocoder_country_result() -> GeocoderSchema:
+    return GeocoderSchema(
+        name='Россия',
+        full_address='Россия',
+        coordinates='99.505405 61.698657',
+        country_code='RU',
+        search_type='country',
+    )
+
+
+@pytest_asyncio.fixture
+async def patched_geocoder_api_repository_for_city(
+    monkeypatch: MonkeyPatch,
+    geocoder_api_city_response: dict
+):
+    """
+    This fixture for override _send_request method
+
+    :param monkeypatch: fixture for monkey-patching
+    :param geocoder_api_city_response: expected city response from geocoder API
+
+    :return: patched GeocoderAPIRepository
+    """
+    async def return_mock(*args, **kwargs):
+        return MockClientResponse(json.dumps(geocoder_api_city_response), HTTPStatus.OK)
+
+    geocoder_api_repository = GeocoderAPIRepository()
+    monkeypatch.setattr(geocoder_api_repository, '_send_request', return_mock)
+
+    yield geocoder_api_repository
+
+
+@pytest_asyncio.fixture
+async def geocoder_api_city_response() -> dict:
+    return {
+        'response': {
+            'GeoObjectCollection': {
+                'metaDataProperty': {
+                    'GeocoderResponseMetaData': {
+                        'request': 'Гурьевск',
+                        'results': '10',
+                        'found': '2'
+                    }
+                },
+                'featureMember': [
+                    {
+                        'GeoObject': {
+                            'metaDataProperty': {
+                                'GeocoderMetaData': {
+                                    'precision': 'other',
+                                    'text': 'Россия, Калининградская область, Гурьевск',
+                                    'kind': 'locality',
+                                    'Address': {
+                                        'country_code': 'RU',
+                                        'formatted': 'Россия, Калининградская область, Гурьевск',
+                                        'Components': [
+                                            {
+                                                'kind': 'country',
+                                                'name': 'Россия'
+                                            },
+                                            {
+                                                'kind': 'province',
+                                                'name': 'Северо-Западный федеральный округ'
+                                            },
+                                            {
+                                                'kind': 'province',
+                                                'name': 'Калининградская область'
+                                            },
+                                            {
+                                                'kind': 'area',
+                                                'name': 'Гурьевский муниципальный округ'
+                                            },
+                                            {
+                                                'kind': 'locality',
+                                                'name': 'Гурьевск'
+                                            }
+                                        ]
+                                    },
+                                    'AddressDetails': {
+                                        'Country': {
+                                            'AddressLine': 'Россия, Калининградская область, Гурьевск',
+                                            'CountryNameCode': 'RU',
+                                            'CountryName': 'Россия',
+                                            'AdministrativeArea': {
+                                                'AdministrativeAreaName': 'Калининградская область',
+                                                'SubAdministrativeArea': {
+                                                    'SubAdministrativeAreaName': 'Гурьевский муниципальный округ',
+                                                    'Locality': {
+                                                        'LocalityName': 'Гурьевск'
+                                                    }}}}}}
+                            },
+                            'name': 'Гурьевск',
+                            'description': 'Калининградская область, Россия',
+                            'boundedBy': {
+                                'Envelope': {
+                                    'lowerCorner': '20.56515 54.754724',
+                                    'upperCorner': '20.666623 54.798146'
+                                }
+                            },
+                            'Point': {
+                                'pos': '20.608359 54.770401'
+                            }
+                        }
+                    },
+                    {
+                        'GeoObject': {
+                            'metaDataProperty': {
+                                'GeocoderMetaData': {
+                                    'precision': 'other',
+                                    'text': 'Россия, Кемеровская область, Гурьевск',
+                                    'kind': 'locality',
+                                    'Address': {
+                                        'country_code': 'RU',
+                                        'formatted': 'Россия, Кемеровская область, Гурьевск',
+                                        'Components': [
+                                            {
+                                                'kind': 'country',
+                                                'name': 'Россия'
+                                            },
+                                            {
+                                                'kind': 'province',
+                                                'name': 'Сибирский федеральный округ'
+                                            },
+                                            {
+                                                'kind': 'province',
+                                                'name': 'Кемеровская область'
+                                            },
+                                            {
+                                                'kind': 'area',
+                                                'name': 'Гурьевский муниципальный округ'
+                                            },
+                                            {
+                                                'kind': 'locality',
+                                                'name': 'Гурьевск'
+                                            }
+                                        ]
+                                    },
+                                    'AddressDetails': {
+                                        'Country': {
+                                            'AddressLine': 'Россия, Кемеровская область, Гурьевск',
+                                            'CountryNameCode': 'RU',
+                                            'CountryName': 'Россия',
+                                            'AdministrativeArea': {
+                                                'AdministrativeAreaName': 'Кемеровская область',
+                                                'SubAdministrativeArea': {
+                                                    'SubAdministrativeAreaName': 'Гурьевский муниципальный округ',
+                                                    'Locality': {
+                                                        'LocalityName': 'Гурьевск'
+                                                    }}}}}}
+                            },
+                            'name': 'Гурьевск',
+                            'description': 'Кемеровская область, Россия',
+                            'boundedBy': {
+                                'Envelope': {
+                                    'lowerCorner': '85.861523 54.227254',
+                                    'upperCorner': '86.015261 54.313682'
+                                }
+                            },
+                            'Point': {
+                                'pos': '85.947635 54.285935'
+                            }}},
+                ]}}
+    }
+
+
+@pytest_asyncio.fixture
+async def expected_geocoder_city_result() -> list[GeocoderSchema]:
+    return [
+        GeocoderSchema(
+            name='Гурьевск',
+            full_address='Россия, Калининградская область, Гурьевск',
+            coordinates='20.608359 54.770401',
+            country_code='RU',
+            search_type='locality',
+        ),
+        GeocoderSchema(
+            name='Гурьевск',
+            full_address='Россия, Кемеровская область, Гурьевск',
+            coordinates='85.947635 54.285935',
+            country_code='RU',
+            search_type='locality',
+        ),
+    ]
+
+
+@pytest_asyncio.fixture
+async def patched_geocoder_api_repository_not_found(
+    monkeypatch: MonkeyPatch,
+    geocoder_api_not_found_response: dict
+):
+    """
+    This fixture for override _send_request method
+
+    :param monkeypatch: fixture for monkey-patching
+    :param geocoder_api_not_found_response: expected response with no result from geocoder API
+
+    :return: patched GeocoderAPIRepository
+    """
+    async def return_mock(*args, **kwargs):
+        return MockClientResponse(json.dumps(geocoder_api_not_found_response), HTTPStatus.OK)
+
+    geocoder_api_repository = GeocoderAPIRepository()
+    monkeypatch.setattr(geocoder_api_repository, '_send_request', return_mock)
+
+    yield geocoder_api_repository
+
+
+@pytest_asyncio.fixture
+async def geocoder_api_not_found_response() -> dict:
+    return {
+        'response': {
+            'GeoObjectCollection': {
+                'metaDataProperty': {
+                    'GeocoderResponseMetaData': {
+                        'request': '1',
+                        'results': '10',
+                        'found': '0'
+                    }
+                },
+                'featureMember': []
+            }
+        }
     }

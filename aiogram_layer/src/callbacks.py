@@ -1,5 +1,7 @@
 from enum import Enum
 
+from aiogram.filters.callback_data import CallbackData
+
 
 class Callbacks(Enum):
     country = 'country'
@@ -9,3 +11,7 @@ class Callbacks(Enum):
     weather = 'weather'
     country_info = 'country_info'
     currency_rate = 'currency_rate'
+
+
+class CitiesCB(CallbackData, prefix='city'):
+    coordinates: str

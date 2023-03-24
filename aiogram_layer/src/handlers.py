@@ -1,9 +1,11 @@
 from aiogram import types
 from aiogram.filters import Command, Text
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.callbacks import Callbacks as cb
+from aiogram_layer.src.callbacks import CitiesCB
 from aiogram_layer.src.keyboards import (
     country_detail,
     currency_detail,
@@ -32,6 +34,7 @@ from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
 from services.city_service import CityService
 from services.country_service import CountryService
+from services.repositories.api.api_schemas import GeocoderSchema
 
 
 @dp.message(Command('start', 'help'))
@@ -77,7 +80,8 @@ async def enter_city_name(callback: types.CallbackQuery, state: FSMContext):
     :return: None
     """
     await state.set_state(Form.city_search)
-    return await callback.message.reply(
+    await callback.message.delete()
+    return await callback.message.answer(
         text=ENTER_CITY,
         reply_markup=to_main_menu
     )
@@ -104,11 +108,11 @@ async def process_city_name(message: types.Message, state: FSMContext):
     This handler will be called when user inputs city name.
     Continues the dialogue about the country where the city is located.
 
-#     :param message: user's message
-#     :param state: state
-#
-#     :return: Message
-#     """
+    :param message: user's message
+    :param state: state
+
+    :return: Message
+    """
     async with CityService() as uow:
         city_info = await uow.get_city(message.text)
     if not city_info:
@@ -116,15 +120,79 @@ async def process_city_name(message: types.Message, state: FSMContext):
             text=CITY_NOT_FOUND,
             reply_markup=to_main_menu
         )
+
+    if isinstance(city_info, list):
+        builder = InlineKeyboardBuilder()
+        for city in city_info:
+            city: GeocoderSchema
+            builder.button(text=city.full_address, callback_data=CitiesCB(coordinates=city.coordinates))
+        await state.update_data(data={city.coordinates: city for city in city_info})
+
+        return await message.answer(
+            text='По указанному названию нашлось несколько вариантов:',
+            reply_markup=builder.as_markup()
+        )
+
     await message.answer(
-        text=CITY_INFO.format(city=message.text),
+        text=CITY_INFO.format(city=city_info.name),
         reply_markup=country_detail
     )
-    return await state.update_data(
+    currencies = await CountryService().get_currencies(city_info)
+    await state.update_data(
         coordinates=city_info.coordinates,
         country_code=city_info.country_code,
         search_type=city_info.search_type,
-        name=city_info.name)
+        name=city_info.name,
+        currencies=currencies,
+    )
+
+
+@dp.callback_query(CitiesCB.filter(), Form.city_search)
+async def choose_city_from_list(callback: types.CallbackQuery, callback_data: CitiesCB, state: FSMContext):
+    data = await state.get_data()
+    city_info = data[callback_data.coordinates]
+    currencies = await CountryService().get_currencies(city_info)
+    await state.update_data(
+        coordinates=city_info.coordinates,
+        country_code=city_info.country_code,
+        search_type=city_info.search_type,
+        name=city_info.name,
+        currencies=currencies,
+    )
+    return await callback.message.answer(
+        text=CITY_INFO.format(city=city_info.name.capitalize()),
+        reply_markup=country_detail
+    )
+
+
+@dp.callback_query(
+    Text(cb.weather.value),
+    CountryCityForm().city_search
+)
+async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
+    """
+    This handler will be called when user chooses 'Погода' button.
+    Continues the dialog about weather details.
+
+    :param callback: callback function
+    :param state: state
+
+    :return: None
+    """
+
+    async with CityService() as uow:
+        data = await state.get_data()
+        long, lat = data['coordinates'].split()
+        name = data['name']
+        weather = await uow.get_city_weather(float(lat), float(long))
+    detail_text = WEATHER_DETAIL.format(feels_like=weather.current_weather_temp_feels_like,
+                                        temperature=weather.current_weather_temp,
+                                        city=name)
+
+    await callback.message.answer(
+        text=detail_text,
+        reply_markup=weather_detail,
+    )
 
 
 @dp.callback_query(
@@ -156,36 +224,6 @@ async def get_capital_weather(callback: types.CallbackQuery, state: FSMContext):
 
 
 @dp.callback_query(
-    Text(cb.weather.value),
-    Form.city_search
-)
-async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
-    """
-    This handler will be called when user chooses 'Погода' button.
-    Continues the dialog about weather details.
-
-    :param callback: callback function
-    :type callback: types.CallbackQuery
-    :param state: state
-    :type state: FSMContext
-
-    :return: None
-    """
-    async with CityService() as uow:
-        data = await state.get_data()
-        long, lat = data['coordinates'].split()
-        name = data['name']
-        weather = await uow.get_city_weather(float(lat), float(long))
-    detail_text = WEATHER_DETAIL.format(feels_like=weather.current_weather_temp_feels_like,
-                                        temperature=weather.current_weather_temp,
-                                        city=name)
-    return await callback.message.reply(
-        text=detail_text,
-        reply_markup=weather_detail
-    )
-
-
-@dp.callback_query(
     Text(cb.country_info.value),
     CountryCityForm()
 )
@@ -193,10 +231,8 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Подробнее о стране' button.
     Continues the dialog about country details.
-
     :param state: state
     :param callback: callback function
-
     :return: None
     """
     data = await state.get_data()
@@ -204,7 +240,7 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     return await callback.message.reply(
         text=COUNTRY_INFO.format(
             country=detail.name,
-            capital=detail.capital,
+            capital=data['capital'].name,
             population=detail.population,
             area=detail.area_size,
             languages=', '.join(str(language) for language in data['languages']),
@@ -222,10 +258,8 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Курс валюты' button.
     Continues the dialog about currency rate.
-
     :param state: state
     :param callback: callback function
-
     :return: None
     """
     data = await state.get_data()
@@ -293,7 +327,7 @@ async def process_country_name_invalid(message: types.Message):
     """
     return await message.reply(
         text=INVALID_COUNTRY,
-        reply_markup=to_main_menu
+        reply_markup=to_main_menu,
     )
 
 
@@ -301,10 +335,8 @@ async def process_country_name_invalid(message: types.Message):
 async def process_country_name(message: types.Message, state: FSMContext):
     """
     This handler will be called when user inputs country name.
-
     :param state: state
     :param message: arg1
-
     :return: None
     """
     info = await CountryService().get_country_info(message.text)
@@ -314,18 +346,20 @@ async def process_country_name(message: types.Message, state: FSMContext):
             reply_markup=to_main_menu
         )
     detail = await CountryService().get_country(info)
+    capital = await CountryService().get_capital_info(info)
     languages = await CountryService().get_languages(info)
     currencies = await CountryService().get_currencies(info)
     await state.update_data(
         country_info=info,
         country_detail=detail,
+        capital=capital,
         languages=languages.languages,
         currencies=currencies
     )
     return await message.reply(
         text=COUNTRY_INFO.format(
             country=detail.name,
-            capital=detail.capital,
+            capital=capital.name,
             population=detail.population,
             area=detail.area_size,
             languages=', '.join(str(language) for language in languages.languages),
