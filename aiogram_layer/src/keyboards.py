@@ -3,7 +3,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_layer.src.buttons import Buttons
 from aiogram_layer.src.callbacks import CitiesCB
-from services.repositories.api.api_schemas import GeocoderSchema
 
 main_menu = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -23,6 +22,14 @@ country_detail = InlineKeyboardMarkup(
     inline_keyboard=[
         [Buttons.weather.value],
         [Buttons.currency.value],
+        [Buttons.to_main_menu.value],
+    ]
+)
+city_detail = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [Buttons.weather.value],
+        [Buttons.currency.value],
+        [Buttons.country.value],
         [Buttons.to_main_menu.value],
     ]
 )
