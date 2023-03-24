@@ -20,7 +20,12 @@ CITY_INFO = '''
 Информация о стране, где расположен город {city}
 '''
 COUNTRY_INFO = '''
-Информация о стране {country}, {languages}, {currencies}
+Информация о стране {country}:
+Столица {capital}
+Население составляет {population}
+Площадь территории составляет {area}
+Государственный язык: {languages}
+Госудаственная валюта: {currencies}
 '''
 CITY_INFO = '''
 Информация о городe: {city}
@@ -48,4 +53,7 @@ INVALID_COUNTRY = '''
 '''
 COUNTRY_NOT_FOUND = '''
 Такая страна не найдена. Попробуйте еще раз
+'''
+NON_TRADING_CURRENCY = '''
+Валюта страны не торгуется к рублю
 '''

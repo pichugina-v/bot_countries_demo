@@ -14,7 +14,7 @@ from services.service_schemas import CityCoordinatesSchema
 @dataclass
 class CountryService:
     """
-    Class for get info about city from same repositories.
+    Class for get info about country from cache, database or api repositories.
     """
     cache: Cache = Cache()
     geocoder: GeocoderAPIRepository = GeocoderAPIRepository()
@@ -40,26 +40,36 @@ class CountryService:
             await self.cache.create_or_update_country(country_info.coordinates, country)
         return db_country
 
-    async def get_languages(self, country_info: GeocoderSchema):
+    async def get_languages(self, country_info: GeocoderSchema):    # положить локализованные языки в кэш
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return LanguageNamesSchema(languages=cache_country.languages)
-        return await self.crud.get_country_languages(country_info.country_code)
+        languages = await self.crud.get_country_languages(country_info.country_code)
+        if not languages:
+            country = await self.countries_repo.get_country_detail(country_info.country_code)
+            await self.crud.create(country)
+            languages = await self.crud.get_country_languages(country_info.country_code)
+        return languages
 
     async def get_currencies(self, country_info: GeocoderSchema):
+        cache_country = await self.cache.get_country(country_info.coordinates)
+        if cache_country:
+            return CurrencyCodesSchema(currency_codes=[currency for currency in cache_country.currencies.keys()])
         currencies = await self.crud.get_country_currencies(country_info.country_code)
         if not currencies:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             await self.crud.create(country)
-            currencies = CurrencyCodesSchema(currency_codes=list(country.currencies))
+            currencies = await self.crud.get_country_currencies(country_info.country_code)
+        return currencies
 
+    async def get_currency_rates(self, currencies: CurrencyCodesSchema):
         return await self.currency_repo.get_rate(currencies.currency_codes)
 
     async def get_capital_weather(self, country_info: GeocoderSchema):
-        city = await self._get_capital_info(country_info)
+        city = await self.get_capital_info(country_info)
         return await self.weather_repo.get_weather(city.latitude, city.longitude)
 
-    async def _get_capital_info(self, country_info: GeocoderSchema):
+    async def get_capital_info(self, country_info: GeocoderSchema):
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return CityCoordinatesSchema(
