@@ -1,6 +1,14 @@
 from pydantic import BaseModel, Field
 
 
+class AllRateSchema(BaseModel):
+    """
+    Pydantic schema for CurrencyAPIRepository. Used to get all currencies.
+    """
+
+    all_rate: dict
+
+
 class CurrencySchema(BaseModel):
     """
     Pydantic schema for CurrencyAPIRepository. Using for parsing response from CurrencyAPI.

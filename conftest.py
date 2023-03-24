@@ -4,7 +4,8 @@ from typing import Generator
 import pytest
 
 pytest_plugins = [
-    'cache.test.fixtures'
+    'cache.test.fixtures',
+    'tasks.test.fixtures'
 ]
 
 
