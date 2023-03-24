@@ -13,7 +13,7 @@ class CityService(AbstractUnitOfWork):
 
     def __init__(self):
         self.geocoder = GeocoderAPIRepository()
-        self.repository = CityBDRepository()
+        self.crud = CityBDRepository()
         self.cache = Cache()
         self.weather_repo: WeatherAPIRepository = WeatherAPIRepository()
 
@@ -35,5 +35,12 @@ class CityService(AbstractUnitOfWork):
         return None
 
     async def get_city_weather(self, latitude: float, longitude: float) -> WeatherSchema | None:
+        """
+        Get temperature and feels like in city
+
+        :param latitude: city latitude
+        :param longitude: city longitude
+        :return: pydantic schema with weather data
+        """
         weather = await self.weather_repo.get_weather(latitude, longitude)
         return weather
