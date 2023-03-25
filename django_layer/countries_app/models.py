@@ -1,18 +1,5 @@
 from django.db import models
-
-# from django.utils import translation
-# from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-
-# class CustomManager(models.Manager):
-#     async def abulk_create(self, objs, **kwargs):
-#         translation.activate('ru')
-#         for obj in objs:
-#             val = getattr(obj, 'name', False)
-#             setattr(obj, 'name', gettext(val))
-#         translation.deactivate()
-#         created = await super().abulk_create(objs, **kwargs)
-#         return created
 
 
 class City(models.Model):
@@ -53,7 +40,6 @@ class Language(models.Model):
     name = models.CharField(max_length=50, verbose_name=_('name'), unique=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('updated at'))
     country = models.ManyToManyField('Country', related_name='languages')
-    # objects = CustomManager()
 
     class Meta:
         verbose_name = _('language')

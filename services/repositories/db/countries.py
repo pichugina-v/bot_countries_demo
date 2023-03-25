@@ -102,7 +102,7 @@ class CountryDBRepository(AbstractDBRepository):
 
     async def update_country_schema(self, country: CountrySchema, db_country: Country) -> CountrySchema:
         """
-        Updates CountrySchema with locallased languages of country, created in database.
+        Updates CountrySchema with localised languages of country, created in database.
 
         :param country: CountrySchema
         param db_country: Country object
