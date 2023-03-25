@@ -72,7 +72,7 @@ class CountryService(AbstractUnitOfWork):
         cache_country = await self.cache.get_country(country_info.coordinates)
         if cache_country:
             return cache_country
-        db_country = await self.crud.get_by_name(name=country_info.name)
+        db_country = await self.crud.get_by_pk(country_info.country_code)
         if not db_country:
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             if country:

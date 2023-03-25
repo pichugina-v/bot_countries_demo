@@ -1,7 +1,4 @@
-import asyncio
-import platform
 from datetime import datetime
-from typing import Generator
 
 import pytest
 import pytest_asyncio
@@ -12,18 +9,6 @@ from aiogram.types import CallbackQuery, Chat, Message, Update, User
 
 from aiogram_layer.src.app import dp
 from aiogram_layer.src.tests.mocks import MockedBot
-
-
-@pytest.fixture(scope='session')
-def event_loop() -> Generator:
-    """
-        Create event loop for testing
-    """
-    if platform.system() == 'Windows':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture()
