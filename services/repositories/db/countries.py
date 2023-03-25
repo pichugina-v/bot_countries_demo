@@ -208,7 +208,8 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         for code, name in currencies.items():
-            await Currency.objects.filter(iso_code=code).aupdate(name=name)
+            await Currency.objects.filter(iso_code=code).aupdate_or_create(iso_code=code,
+                                                                           defaults={'name': name})
         await sync_to_async(country.currencies.clear)()
         existing_currencies = [Currency(iso_code=code, name=name) for code, name in currencies.items()]
         await self._bulk_create_currencies(country, existing_currencies=existing_currencies)
@@ -283,7 +284,7 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         await City.objects.filter(country_id=data.iso_code, is_capital=True).aupdate(
-            name=gettext(data.capital)
+            name=data.capital
         )
 
 

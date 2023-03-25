@@ -7,11 +7,13 @@ from cache.test.methods import clear_redis, create_test_data
 from services.repositories.api.api_schemas import CitySchema, CountrySchema
 
 COUNTRY_COORDINATES_KEY = '1234123 6623621'
+COUNTRY_NAME = 'Россия'
 LONG = 152342.323424
 LAT = 643534.3423423
 CITY_COORDINATES_KEY = f'{LONG}_{LAT}'
 KEY_CITY = f'{PREFIX_CITY}{CITY_COORDINATES_KEY}'
 KEY_COUNTRY = f'{PREFIX_COUNTRY}{COUNTRY_COORDINATES_KEY.replace(" ", "_")}'
+KEY_COUNTRY_NAME = f'{PREFIX_COUNTRY}{COUNTRY_NAME}'
 
 # async def ggggg():
 #    await clear_redis([KEY_CITY])
@@ -44,7 +46,7 @@ async def country_data() -> CountrySchema:
         area_size=4545.1111,
         population=145000000,
         currencies=dict(key_1='value_1', key_2='value_2'),
-        languages=['русский', 'английский'],
+        languages=['английский', 'русский'],
     )
 
 
@@ -73,6 +75,14 @@ async def _create_cache_country(country_data: pytest_asyncio.fixture) -> None:
 
 
 @pytest_asyncio.fixture()
+async def _create_test_cache_country_by_name(expected_geocoder_country_result: pytest_asyncio.fixture) -> None:
+    """
+    The fixture creates a cache entry for the country.
+    """
+    await create_test_data(KEY_COUNTRY_NAME, expected_geocoder_country_result)
+
+
+@pytest_asyncio.fixture()
 async def _create_cache_city(city_data: pytest_asyncio.fixture) -> None:
     """
     The fixture creates a cache entry for the city.
@@ -89,7 +99,7 @@ BAD_RESULT = 'this is a random string'
 
 @pytest_asyncio.fixture
 async def clear_all_test_cache():
-    keys_with_prefix = [KEY_COUNTRY, KEY_CITY]
+    keys_with_prefix = [KEY_COUNTRY, KEY_CITY, KEY_COUNTRY_NAME]
     keys_without_prefix = [GOOD_RECORD_KEY, ONE_BAD_VALUE_KEY, ALL_BAD_VALUE_KEY,
                            ONLY_ONE_GOOD_KEY, ONLY_ONE_BAD_KEY]
     for indx in range(len(keys_without_prefix)):
@@ -102,7 +112,7 @@ async def auto_clear_cache_after_test() -> AsyncGenerator[None, None]:
     """
     The fixture clears records in the database after passing all the tests.
     """
-    keys_with_prefix = [KEY_COUNTRY, KEY_CITY]
+    keys_with_prefix = [KEY_COUNTRY, KEY_CITY, KEY_COUNTRY_NAME]
     keys_without_prefix = [GOOD_RECORD_KEY, ONE_BAD_VALUE_KEY, ALL_BAD_VALUE_KEY,
                            ONLY_ONE_GOOD_KEY, ONLY_ONE_BAD_KEY]
     for indx in range(len(keys_without_prefix)):

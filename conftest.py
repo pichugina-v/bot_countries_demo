@@ -10,7 +10,7 @@ pytest_plugins = [
     'services.repositories.db.tests.fixture',
     'aiogram_layer.src.tests.fixtures',
     'cache.test.fixtures',
-    'tasks.test.fixtures',
+    # 'tasks.test.fixtures',
 ]
 
 os.environ['WEATHER_API_KEY'] = 'fake_api_key'
