@@ -64,7 +64,7 @@ async def show_about_page(callback: types.CallbackQuery):
     :param callback: callback function
     :type callback: types.CallbackQuery
 
-    :return: None
+    :return: basic info about project
     """
     return await callback.message.reply(
         text=ABOUT_MESSAGE,
@@ -80,7 +80,7 @@ async def enter_city_name(callback: types.CallbackQuery, state: FSMContext):
     :param state: current state
     :param callback: callback function
 
-    :return: None
+    :return: dialogue for enter city name
     """
     await state.set_state(Form.city_search)
     await callback.message.delete()
@@ -97,7 +97,7 @@ async def process_city_name_invalid(message: types.Message):
 
     :param message: message
 
-    :return: None
+    :return: warning message about invalid city name
     """
     return await message.reply(
         text=INVALID_CITY,
@@ -169,10 +169,7 @@ async def choose_city_from_list(callback: types.CallbackQuery, callback_data: Ci
     )
 
 
-@dp.callback_query(
-    Text(cb.weather.value),
-    CountryCityForm().city_search
-)
+@dp.callback_query(Text(cb.weather.value), CountryCityForm().city_search)
 async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
     """
     This handler will be called when user chooses 'Погода' button.
@@ -213,7 +210,7 @@ async def get_capital_weather(callback: types.CallbackQuery, state: FSMContext):
     :param state: state
     :type state: FSMContext
 
-    :return: None
+    :return: info about weather in capital of country
     """
     detail_text = WEATHER_NOT_AVAILABLE
     data = await state.get_data()
