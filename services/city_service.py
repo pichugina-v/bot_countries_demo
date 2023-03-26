@@ -1,5 +1,5 @@
 from cache.cache_module import Cache
-from services.repositories.abstract_uow import AbstractUnitOfWork
+from services.abstract_uow import AbstractUnitOfWork
 from services.repositories.api.api_schemas import GeocoderSchema, WeatherSchema
 from services.repositories.api.geocoder import GeocoderAPIRepository
 from services.repositories.api.weather import WeatherAPIRepository

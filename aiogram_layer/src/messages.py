@@ -1,3 +1,10 @@
+from services.repositories.api.api_schemas import (
+    CurrencySchema,
+    GeocoderSchema,
+    WeatherSchema,
+)
+from services.service_schemas import CountryUOWSchema
+
 START_MESSAGE = '''
 Привет! Выберите, что Вас интересует:
 '''
@@ -16,31 +23,45 @@ ENTER_CITY = '''
 ENTER_COUNTRY = '''
 Введите название страны:
 '''
-CITY_INFO = '''
-Информация о стране, где расположен город {city}
-'''
 COUNTRY_INFO = '''
 Информация о стране {country}:
-Столица {capital}
-Население составляет {population} человека
-Площадь территории составляет {area} кв.км
+
+Столица: {capital}
+Население: {population} человек
+Площадь территории: {area} кв.км
 Государственный язык: {languages}
-Госудаственная валюта: {currencies}
+Государственная валюта: {currencies}
 '''
 CITY_INFO = '''
 Информация о городe: {city}
+
+Полный адрес: {full_address}
+Координаты(долгота, широта): {coordinates}
 '''
 CITY_NOT_FOUND = '''
 Город с таким названием не найден
 '''
 WEATHER_DETAIL = '''
 Погода в городе {city}:
-Температура: {temperature}
-Ощущается как: {feels_like}
+
+Тип погоды: {weather_type}
+Температура: {temperature}°C
+Ощущается как: {feels_like}°C
+Максимальная температура: {max_temperature}°C
+Минимальная температура: {min_temperature}°C
+Влажность: {humidity}%
+Скорость ветра: {wind_speed} м/с
 '''
 WEATHER_DETAIL_COUNTRY = '''
-Погода в столице {curr}
-Ощущается, как {feels}
+Погода в столице:
+
+Тип погоды: {weather_type}
+Температура: {temperature}°C
+Ощущается как: {feels_like}°C
+Максимальная температура: {max_temperature}°C
+Минимальная температура: {min_temperature}°C
+Влажность: {humidity}%
+Скорость ветра: {wind_speed} м/с
 '''
 CURRENCY_RATE_DETAIL = '''
 Курс валют к рублю: {currency_details}
@@ -66,3 +87,53 @@ WEATHER_NOT_AVAILABLE = '''
 COUNTRY_UNAVAILABLE = '''
 Извините, информация странах сейчас недоступна
 '''
+
+
+def get_city_info_text(city_info: GeocoderSchema) -> str:
+    return CITY_INFO.format(
+        city=city_info.name.capitalize(),
+        full_address=city_info.full_address,
+        coordinates=city_info.coordinates,
+    )
+
+
+def get_country_info_text(country_all_info: CountryUOWSchema) -> str:
+    return COUNTRY_INFO.format(
+        country=country_all_info.detail.name,
+        capital=country_all_info.capital.name,
+        population=country_all_info.detail.population,
+        area=country_all_info.detail.area_size,
+        languages=', '.join(str(language) for language in country_all_info.languages.languages),
+        currencies=', '.join(str(currency) for currency in country_all_info.currencies.currency_codes),
+    )
+
+
+def get_currency_rate_text(currencies: list[CurrencySchema]) -> str:
+    currency_details = ', '.join(f'{currency.name} - {currency.value}' for currency in currencies)
+
+    return CURRENCY_RATE_DETAIL.format(currency_details=currency_details)
+
+
+def get_city_weather_text(city_info: GeocoderSchema, weather: WeatherSchema):
+    return WEATHER_DETAIL.format(
+        city=city_info.name.capitalize(),
+        feels_like=weather.temperature_feels_like,
+        temperature=weather.temperature,
+        weather_type=weather.weather_type,
+        max_temperature=weather.max_temperature,
+        min_temperature=weather.min_temperature,
+        humidity=weather.humidity,
+        wind_speed=weather.wind_speed,
+    )
+
+
+def get_capital_weather_text(weather: WeatherSchema):
+    return WEATHER_DETAIL_COUNTRY.format(
+        feels_like=weather.temperature_feels_like,
+        temperature=weather.temperature,
+        weather_type=weather.weather_type,
+        max_temperature=weather.max_temperature,
+        min_temperature=weather.min_temperature,
+        humidity=weather.humidity,
+        wind_speed=weather.wind_speed,
+    )

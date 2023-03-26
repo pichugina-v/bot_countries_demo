@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from http import HTTPStatus
 
 from aiohttp import ClientResponse, ClientSession
@@ -6,6 +7,24 @@ from aiohttp import ClientResponse, ClientSession
 from services.repositories.api.abstract_api_repository import AbstractAPIRepository
 from services.repositories.api.api_schemas import WeatherSchema
 from services.repositories.api.api_settings import WEATHER_API_KEY, WEATHER_INFO_URL
+
+
+class WeatherType(str, Enum):
+    Thunderstorm = 'гроза'
+    Drizzle = 'морось'
+    Rain = 'дождь'
+    Snow = 'снег'
+    Mist = 'туман'
+    Smoke = 'дым'
+    Haze = 'туман'
+    Dust = 'пыль'
+    Fog = 'густой туман'
+    Sand = 'песчаная буря'
+    Ash = 'вулканический пепел'
+    Squall = 'шторм'
+    Tornado = 'торнадо'
+    Clouds = 'облачно'
+    Clear = 'ясно'
 
 
 @dataclass
@@ -60,9 +79,15 @@ class WeatherAPIRepository(AbstractAPIRepository):
         :return: parsed response as a :class:`WeatherData` object
         """
         data_weather = await response.json()
+        main = data_weather['main']
         return WeatherSchema(
-            current_weather_temp=data_weather['main']['temp'],
-            current_weather_temp_feels_like=data_weather['main']['feels_like'],
+            temperature=round(main['temp'], 1),
+            temperature_feels_like=round(main['feels_like'], 1),
+            weather_type=getattr(WeatherType, data_weather['weather'][0]['main']),
+            humidity=main['humidity'],
+            max_temperature=round(main['temp_max'], 1),
+            min_temperature=round(main['temp_min'], 1),
+            wind_speed=data_weather['wind']['speed'],
         )
 
 

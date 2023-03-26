@@ -17,12 +17,9 @@ from aiogram_layer.src.keyboards import (
 from aiogram_layer.src.messages import (
     ABOUT_MESSAGE,
     CITIES_LIST,
-    CITY_INFO,
     CITY_NOT_FOUND,
-    COUNTRY_INFO,
     COUNTRY_NOT_FOUND,
     COUNTRY_UNAVAILABLE,
-    CURRENCY_RATE_DETAIL,
     ENTER_CITY,
     ENTER_COUNTRY,
     INVALID_CITY,
@@ -30,9 +27,12 @@ from aiogram_layer.src.messages import (
     NON_TRADING_CURRENCY,
     RESTART_MESSAGE,
     START_MESSAGE,
-    WEATHER_DETAIL,
-    WEATHER_DETAIL_COUNTRY,
     WEATHER_NOT_AVAILABLE,
+    get_capital_weather_text,
+    get_city_info_text,
+    get_city_weather_text,
+    get_country_info_text,
+    get_currency_rate_text,
 )
 from aiogram_layer.src.states import CountryCityForm, Form
 from aiogram_layer.src.validators import is_city_name_valid, is_country_name_valid
@@ -132,17 +132,17 @@ async def process_city_name(message: types.Message, state: FSMContext):
             text=CITIES_LIST,
             reply_markup=builder.as_markup()
         )
-
-    await message.answer(
-        text=CITY_INFO.format(city=city_info.name),
-        reply_markup=city_detail
-    )
     async with CountryService() as uow:
         country_all_info = await uow.get_country_all_info(city_info)
         await state.update_data(
             city_info=city_info,
             country_detail=country_all_info,
         )
+    text = get_city_info_text(city_info)
+    return await message.answer(
+        text=text,
+        reply_markup=city_detail,
+    )
 
 
 @dp.callback_query(CitiesCB.filter(), Form.city_search)
@@ -163,9 +163,10 @@ async def choose_city_from_list(callback: types.CallbackQuery, callback_data: Ci
             city_info=city_info,
             country_detail=country_all_info,
         )
+    text = get_city_info_text(city_info)
     return await callback.message.answer(
-        text=CITY_INFO.format(city=city_info.name.capitalize()),
-        reply_markup=city_detail
+        text=text,
+        reply_markup=city_detail,
     )
 
 
@@ -186,12 +187,10 @@ async def get_city_weather(callback: types.CallbackQuery, state: FSMContext):
         city_info = data['city_info']
         long, lat = city_info.coordinates.split()
         weather = await uow.get_city_weather(float(lat), float(long))
-    detail_text = WEATHER_DETAIL.format(feels_like=weather.current_weather_temp_feels_like,
-                                        temperature=weather.current_weather_temp,
-                                        city=city_info.name)
+    text = get_city_weather_text(city_info, weather)
 
     return await callback.message.answer(
-        text=detail_text,
+        text=text,
         reply_markup=weather_detail,
     )
 
@@ -217,11 +216,8 @@ async def get_capital_weather(callback: types.CallbackQuery, state: FSMContext):
     async with CountryService() as uow:
         weather = await uow.get_capital_weather(data['country_info'])
     if weather:
-        detail_text = WEATHER_DETAIL_COUNTRY.format(
-            curr=weather.current_weather_temp,
-            feels=weather.current_weather_temp_feels_like
-        )
-    return await callback.message.reply(
+        detail_text = get_capital_weather_text(weather)
+    return await callback.message.answer(
         text=detail_text,
         reply_markup=weather_detail,
     )
@@ -243,15 +239,10 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     """
     data = await state.get_data()
     country_all_info = data['country_detail']
-    return await callback.message.reply(
-        text=COUNTRY_INFO.format(
-            country=country_all_info.detail.name,
-            capital=country_all_info.capital.name,
-            population=country_all_info.detail.population,
-            area=country_all_info.detail.area_size,
-            languages=', '.join(str(language) for language in country_all_info.languages.languages),
-            currencies=', '.join(str(currency) for currency in country_all_info.currencies.currency_codes),
-        ),
+    text = get_country_info_text(country_all_info)
+
+    return await callback.message.answer(
+        text=text,
         reply_markup=country_detail,
     )
 
@@ -271,16 +262,16 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     """
     data = await state.get_data()
     async with CountryService() as uow:
-        currency_info = await uow.get_currency_rates(data['country_detail'].currencies)
-    if not currency_info:
+        currencies = await uow.get_currency_rates(data['country_detail'].currencies)
+    if not currencies:
         return await callback.message.reply(
             text=NON_TRADING_CURRENCY,
             reply_markup=currency_detail,
         )
-    for currency in currency_info:
-        currency_details = f'{str(currency.name)} - {str(currency.value)}'
+    text = get_currency_rate_text(currencies)
+
     return await callback.message.reply(
-        text=CURRENCY_RATE_DETAIL.format(currency_details=currency_details),
+        text=text,
         reply_markup=currency_detail,
     )
 
@@ -362,14 +353,8 @@ async def process_country_name(message: types.Message, state: FSMContext):
         country_info=info,
         country_detail=country_all_info
     )
-    return await message.reply(
-        text=COUNTRY_INFO.format(
-            country=country_all_info.detail.name,
-            capital=country_all_info.capital.name,
-            population=country_all_info.detail.population,
-            area=country_all_info.detail.area_size,
-            languages=', '.join(str(language) for language in country_all_info.languages.languages),
-            currencies=', '.join(str(currency) for currency in country_all_info.currencies.currency_codes),
-        ),
+    text = get_country_info_text(country_all_info)
+    return await message.answer(
+        text=text,
         reply_markup=country_detail,
     )

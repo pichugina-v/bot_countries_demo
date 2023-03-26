@@ -50,8 +50,13 @@ class GeocoderSchema(BaseModel):
 
 
 class WeatherSchema(BaseModel):
-    current_weather_temp: float
-    current_weather_temp_feels_like: float
+    temperature: float
+    temperature_feels_like: float
+    max_temperature: float
+    min_temperature: float
+    weather_type: str
+    humidity: float
+    wind_speed: float
 
 
 class CitySchema(BaseModel):

@@ -4,15 +4,14 @@ from cache.cache_settings import PREFIX_CITY, PREFIX_COUNTRY
 from cache.test.methods import clear_redis, create_test_data
 from services.repositories.api.api_schemas import CitySchema, CountrySchema
 
-
-COUNTRY_COORDINATES_KEY = '1234123 6623621'
+COUNTRY_COORDINATES_KEY = '99.505405 61.698657'
 COUNTRY_NAME = 'Россия'
-LONG = 152342.323424
-LAT = 643534.3423423
+LONG = 37.6
+LAT = 55.75
 CITY_COORDINATES_KEY = f'{LONG}_{LAT}'
 KEY_CITY = f'{PREFIX_CITY}{CITY_COORDINATES_KEY}'
 KEY_COUNTRY = f'{PREFIX_COUNTRY}{COUNTRY_COORDINATES_KEY.replace(" ", "_")}'
-
+KEY_COUNTRY_NAME = f'{PREFIX_COUNTRY}{COUNTRY_NAME}'
 
 @pytest_asyncio.fixture(autouse=False)
 async def city_data() -> CitySchema:
@@ -39,10 +38,10 @@ async def country_data() -> CountrySchema:
         capital='Москва',
         capital_longitude=LONG,
         capital_latitude=LAT,
-        area_size=4545.1111,
-        population=145000000,
-        currencies=dict(key_1='value_1', key_2='value_2'),
-        languages=['русский', 'английский'],
+        area_size=17098242.0,
+        population=144104080,
+        currencies={'RUB': 'Russian ruble'},
+        languages=['Английский', 'Русский']
     )
 
 
@@ -70,7 +69,15 @@ async def _create_cache_country(country_data: pytest_asyncio.fixture) -> None:
     await create_test_data(KEY_COUNTRY, country_data)
 
 
-@pytest_asyncio.fixture(autouse=False)
+@pytest_asyncio.fixture()
+async def _create_cache_country_by_name(expected_geocoder_country_result: pytest_asyncio.fixture) -> None:
+    """
+    The fixture creates a cache entry for the country.
+    """
+    await create_test_data(KEY_COUNTRY_NAME, expected_geocoder_country_result)
+
+
+@pytest_asyncio.fixture()
 async def _create_cache_city(city_data: pytest_asyncio.fixture) -> None:
     """
     The fixture creates a cache entry for the city.
