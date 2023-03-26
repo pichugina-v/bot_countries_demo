@@ -6,7 +6,7 @@ from cache.test.fixtures import COUNTRY_NAME
 from django_layer.countries_app.models import City, Country
 from services.country_service import CountryService
 from services.repositories.db.schemas import CurrencyCodesSchema, LanguageNamesSchema
-from services.service_schemas import CityCoordinatesSchema, CountryUOWSchema
+from services.service_schemas import CityCoordinatesSchema
 
 
 @pytest.mark.asyncio

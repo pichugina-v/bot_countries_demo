@@ -27,6 +27,7 @@ from aiogram_layer.src.messages import (
     NON_TRADING_CURRENCY,
     RESTART_MESSAGE,
     START_MESSAGE,
+    UNKNOWN_COMMAND,
     WEATHER_NOT_AVAILABLE,
     get_capital_weather_text,
     get_city_info_text,
@@ -47,9 +48,9 @@ async def start_page(message: types.Message):
 
     :param message: message
 
-    :return: None
+    :return: main menu
     """
-    return await message.reply(
+    return await message.answer(
         text=START_MESSAGE,
         reply_markup=main_menu
     )
@@ -264,13 +265,13 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     async with CountryService() as uow:
         currencies = await uow.get_currency_rates(data['country_detail'].currencies)
     if not currencies:
-        return await callback.message.reply(
+        return await callback.message.answer(
             text=NON_TRADING_CURRENCY,
             reply_markup=currency_detail,
         )
     text = get_currency_rate_text(currencies)
 
-    return await callback.message.reply(
+    return await callback.message.answer(
         text=text,
         reply_markup=currency_detail,
     )
@@ -357,4 +358,19 @@ async def process_country_name(message: types.Message, state: FSMContext):
     return await message.answer(
         text=text,
         reply_markup=country_detail,
+    )
+
+
+@dp.message()
+async def handle_unknown_commands(message: types.Message):
+    """
+    This handler for handling unknown commands
+
+    :param message: message
+
+    :return: warning message with instructions
+    """
+    return message.reply(
+        text=UNKNOWN_COMMAND,
+        reply_markup=to_main_menu,
     )

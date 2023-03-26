@@ -1,9 +1,13 @@
+import locale
+
 from services.repositories.api.api_schemas import (
     CurrencySchema,
     GeocoderSchema,
     WeatherSchema,
 )
 from services.service_schemas import CountryUOWSchema
+
+locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 START_MESSAGE = '''
 Привет! Выберите, что Вас интересует:
@@ -12,9 +16,8 @@ RESTART_MESSAGE = '''
 Выберите, что Вас интересует:
 '''
 ABOUT_MESSAGE = '''
-Данный бот позволяет получить информацию о любой стране:
-площадь, численность населения, официальные языки,
-курс местной валюты, погоду в столице.
+*Данный бот позволяет получить информацию о любой стране*:
+-площадь\n-численность населения\n-официальные языки\n-курс местной валюты к рублю\n-погоду в столице\n
 Также можно ввести название города и узнать погоду в данном городе.
 '''
 ENTER_CITY = '''
@@ -24,16 +27,16 @@ ENTER_COUNTRY = '''
 Введите название страны:
 '''
 COUNTRY_INFO = '''
-Информация о стране {country}:
+Информация о стране *{country}*:
 
 Столица: {capital}
-Население: {population} человек
-Площадь территории: {area} кв.км
+Население: {population:n} человек
+Площадь территории: {area:n} км²
 Государственный язык: {languages}
 Государственная валюта: {currencies}
 '''
 CITY_INFO = '''
-Информация о городe: {city}
+Информация о городe: *{city}*
 
 Полный адрес: {full_address}
 Координаты(долгота, широта): {coordinates}
@@ -42,7 +45,7 @@ CITY_NOT_FOUND = '''
 Город с таким названием не найден
 '''
 WEATHER_DETAIL = '''
-Погода в городе {city}:
+Погода в городе *{city}*:
 
 Тип погоды: {weather_type}
 Температура: {temperature}°C
@@ -87,6 +90,9 @@ WEATHER_NOT_AVAILABLE = '''
 COUNTRY_UNAVAILABLE = '''
 Извините, информация странах сейчас недоступна
 '''
+UNKNOWN_COMMAND = '''
+'Неизвестная команда.\nДля перехода в главное меню используйте команду: /start'
+'''
 
 
 def get_city_info_text(city_info: GeocoderSchema) -> str:
@@ -109,9 +115,12 @@ def get_country_info_text(country_all_info: CountryUOWSchema) -> str:
 
 
 def get_currency_rate_text(currencies: list[CurrencySchema]) -> str:
-    currency_details = ', '.join(f'{currency.name} - {currency.value}' for currency in currencies)
+    currency_details = ', '.join(
+        f'Валюта: {currency.name}\nКурс: {currency.value} RUB/{currency.char_code}' for currency in currencies
+    )
 
-    return CURRENCY_RATE_DETAIL.format(currency_details=currency_details)
+    return currency_details
+    # return CURRENCY_RATE_DETAIL.format(currency_details=currency_details)
 
 
 def get_city_weather_text(city_info: GeocoderSchema, weather: WeatherSchema):

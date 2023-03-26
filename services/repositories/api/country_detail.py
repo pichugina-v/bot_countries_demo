@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from http import HTTPStatus
 
-from aiohttp import ClientResponse, ClientSession
+from aiohttp import ClientConnectorError, ClientResponse, ClientSession
 
 from services.repositories.api.abstract_api_repository import AbstractAPIRepository
 from services.repositories.api.api_schemas import CountrySchema
@@ -26,7 +26,11 @@ class CountryAPIRepository(AbstractAPIRepository):
         :return: country details as :class:`CountrySchema` object or None
         """
         url = f'{COUNTRY_INFO_URL}{country_code}'
-        response = await self._send_request(url=url)
+        try:
+            response = await self._send_request(url=url)
+        except ClientConnectorError:
+            # may be better raise custom exception
+            return None
         if response.status == HTTPStatus.OK:
             return await self._parse_response(response)
         return None
