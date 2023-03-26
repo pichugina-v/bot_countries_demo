@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from cache.cache_module import Cache
 from django_layer.countries_app.models import Country
-from services.repositories.abstract_uow import AbstractUnitOfWork
+from services.abstract_uow import AbstractUnitOfWork
 from services.repositories.api.api_schemas import (
     CountrySchema,
     CurrencySchema,

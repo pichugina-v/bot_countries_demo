@@ -21,10 +21,11 @@ def bot():
         Bot.reset_current(token)
 
 
-@pytest_asyncio.fixture()
-async def dispatcher(state: FSMContext, bot: Bot):
+@pytest_asyncio.fixture(scope='function')
+async def dispatcher(state: FSMContext, bot: Bot, state_data: dict):
     current_state = dp.fsm.get_context(bot=bot, user_id=TEST_USER.id, chat_id=TEST_USER_CHAT.id)
     await current_state.set_state(state)
+    await current_state.update_data(data=state_data)
     await dp.emit_startup()
     try:
         yield dp
