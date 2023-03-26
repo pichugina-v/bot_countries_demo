@@ -13,5 +13,5 @@ class Callbacks(Enum):
     currency_rate = 'currency_rate'
 
 
-class CitiesCB(CallbackData, prefix='city'):
+class CitiesCB(CallbackData, prefix='city'):  # type: ignore
     coordinates: str

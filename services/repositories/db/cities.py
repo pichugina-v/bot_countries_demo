@@ -57,7 +57,7 @@ class CityBDRepository(AbstractDBRepository):
         )
         return new_city
 
-    async def update(self, city_id: int, data: CitySchema) -> City | None:
+    async def update(self, city_id: int, data: CitySchema) -> City:
         """
         Update a city record in City table
 
@@ -66,14 +66,16 @@ class CityBDRepository(AbstractDBRepository):
 
         :return: updated city record from City table
         """
-        await City.objects.filter(id=city_id).aupdate(
-            name=data.name,
-            longitude=data.longitude,
-            latitude=data.latitude,
-            is_capital=data.is_capital,
-            country=await Country.objects.aget(iso_code=data.country_code)
+        updated_city, _ = await City.objects.aupdate_or_create(
+            id=city_id,
+            defaults={
+                'name': data.name,
+                'longitude': data.longitude,
+                'latitude': data.latitude,
+                'is_capital': data.is_capital,
+                'country': await Country.objects.aget(iso_code=data.country_code)
+            }
         )
-        updated_city = await self.get_by_pk(city_id)
         return updated_city
 
 

@@ -102,7 +102,7 @@ class CountryDBRepository(AbstractDBRepository):
 
     async def update_country_schema(self, country: CountrySchema, db_country: Country) -> CountrySchema:
         """
-        Updates CountrySchema with locallased languages of country, created in database.
+        Updates CountrySchema with localised languages of country, created in database.
 
         :param country: CountrySchema
         param db_country: Country object
@@ -193,6 +193,9 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         await sync_to_async(country.languages.clear)()
+        translation.activate('ru')
+        languages = [gettext(language) for language in languages]
+        translation.deactivate()
         await self._set_languages(languages, country)
 
     async def _update_currencies(self, currencies: dict, country: Country) -> None:
@@ -205,7 +208,8 @@ class CountryDBRepository(AbstractDBRepository):
         :return: None
         """
         for code, name in currencies.items():
-            await Currency.objects.filter(iso_code=code).aupdate(name=name)
+            await Currency.objects.filter(iso_code=code).aupdate_or_create(iso_code=code,
+                                                                           defaults={'name': name})
         await sync_to_async(country.currencies.clear)()
         existing_currencies = [Currency(iso_code=code, name=name) for code, name in currencies.items()]
         await self._bulk_create_currencies(country, existing_currencies=existing_currencies)
