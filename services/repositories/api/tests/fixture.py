@@ -137,7 +137,7 @@ async def country_api_response() -> list:
         {
             'name': {
                 'common': 'Russia',
-                'official': 'Ressuian Federation',
+                'official': 'Russian Federation',
                 'native_name': {
                     'rus': {
                         'official': 'Российская Федерация',
@@ -157,14 +157,14 @@ async def country_api_response() -> list:
                     'symbol': '₽'
                 },
             },
-            'capital': ['Moscow'],
+            'capital': ['Москва'],
             'region': 'Europe',
             'subregion': 'Eastern Europe',
-            'languages': {'rus': 'Russian'},
+            'languages': {'rus': 'Russian', 'eng': 'English'},
             'translations': {
                 'rus': {
                     'official': 'Российская Федерация',
-                    'common': 'Росcия'
+                    'common': 'Россия'
                 },
             },
             'area': 17098242.0,
