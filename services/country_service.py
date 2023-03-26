@@ -95,7 +95,7 @@ class CountryService(AbstractUnitOfWork):
             country = await self.countries_repo.get_country_detail(country_info.country_code)
             if country:
                 db_country = await self._create_db_and_cache_country(country, country_info.coordinates)
-                languages = await self.crud.get_country_currencies(db_country.iso_code)
+                languages = await self.crud.get_country_languages(db_country.iso_code)
         return languages
 
     async def get_currencies(self, country_info: GeocoderSchema) -> CurrencyCodesSchema | None:

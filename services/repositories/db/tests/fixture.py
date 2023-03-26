@@ -61,12 +61,12 @@ def test_updated_country_data() -> CountrySchema:
         iso_code='RU',
         name='Россия',
         capital='Москва',
-        capital_longitude=152342.323424,
-        capital_latitude=643534.3423423,
+        capital_longitude=37.6,
+        capital_latitude=55.75,
         population=333333333,
         area_size=9999999,
         currencies={'RUB': 'Russian ruble', 'USD': 'Dollar'},
-        languages=['русский']
+        languages=['Русский']
     )
 
 
