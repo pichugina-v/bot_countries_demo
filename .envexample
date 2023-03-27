@@ -22,3 +22,7 @@ GEOCODER_URL = 'geocoder-url'
 COUNTRY_INFO_URL = 'rest-countries-url'
 WEATHER_INFO_URL = 'weather-api-url'
 CURRENCY_INFO_URL = 'currency-api-url'
+
+DJANGO_ADMIN_USERNAME = 'admin'
+DJANGO_ADMIN_PASSWORD = 'admin'
+DJANGO_ADMIN_EMAIL = ''
