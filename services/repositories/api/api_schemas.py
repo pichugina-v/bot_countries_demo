@@ -32,7 +32,7 @@ class CountrySchema(BaseModel):
     capital: str
     capital_longitude: float
     capital_latitude: float
-    area_size: float
+    area_size: int
     population: int
     currencies: dict[str, str]
     languages: list[str]

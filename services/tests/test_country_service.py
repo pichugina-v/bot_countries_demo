@@ -6,7 +6,7 @@ from cache.test.fixtures import COUNTRY_NAME
 from django_layer.countries_app.models import City, Country
 from services.country_service import CountryService
 from services.repositories.db.schemas import CurrencyCodesSchema, LanguageNamesSchema
-from services.service_schemas import CityCoordinatesSchema
+from services.service_schemas import CityCoordinatesSchema, CountryUOWSchema
 
 
 @pytest.mark.asyncio
@@ -229,14 +229,15 @@ async def test_get_capital_info_from_db(db_country, expected_geocoder_country_re
     assert capital_info == expected
 
 
-# @pytest.mark.asyncio
-# async def test_get_country_all_info_from_cache(expected_geocoder_country_result, _create_cache_country):
-#     country_info = await CountryService().get_country_all_info(expected_geocoder_country_result)
-#     detail = await Cache().get_country(expected_geocoder_country_result.coordinates)
-#     expected = CountryUOWSchema(
-#         detail=detail,
-#         languages=LanguageNamesSchema(languages=[language for language in detail.languages]),
-#         currencies=CurrencyCodesSchema(currency_codes=[currency for currency in detail.currencies.keys()]),
-#         capital=CityCoordinatesSchema(name=detail.capital, latitude=detail.capital_latitude, longitude=detail.capital_longitude,)
-#     )
-#     assert country_info == expected
+@pytest.mark.asyncio
+async def test_get_country_all_info_from_cache(expected_geocoder_country_result, _create_cache_country):
+    country_info = await CountryService().get_country_all_info(expected_geocoder_country_result)
+    detail = await Cache().get_country(expected_geocoder_country_result.coordinates)
+    expected = CountryUOWSchema(
+        detail=detail,
+        languages=LanguageNamesSchema(languages=[language for language in detail.languages]),
+        currencies=CurrencyCodesSchema(currency_codes=[currency for currency in detail.currencies.keys()]),
+        capital=CityCoordinatesSchema(name=detail.capital, latitude=detail.capital_latitude,
+                                      longitude=detail.capital_longitude,)
+    )
+    assert country_info == expected
