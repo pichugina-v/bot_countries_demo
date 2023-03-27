@@ -31,12 +31,19 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False')
 
-ALLOWED_HOSTS = []  # type: ignore
+DJANGO_ADMIN_USERNAME = os.getenv('DJANGO_ADMIN_USERNAME', 'admin')
+DJANGO_ADMIN_PASSWORD = os.getenv('DJANGO_ADMIN_PASSWORD', 'admin')
+DJANGO_ADMIN_EMAIL = os.getenv('DJANGO_ADMIN_EMAIL', '')
 
+ALLOWED_HOSTS = [
+    '0.0.0.0',
+    'localhost',
+]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
