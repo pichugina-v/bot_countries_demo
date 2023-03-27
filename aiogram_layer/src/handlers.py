@@ -20,6 +20,7 @@ from aiogram_layer.src.messages import (
     CITY_NOT_FOUND,
     COUNTRY_NOT_FOUND,
     COUNTRY_UNAVAILABLE,
+    CURRENCIES_UNAVAILABLE,
     ENTER_CITY,
     ENTER_COUNTRY,
     INVALID_CITY,
@@ -149,7 +150,7 @@ async def process_city_name(message: types.Message, state: FSMContext):
 @dp.callback_query(CitiesCB.filter(), Form.city_search)
 async def choose_city_from_list(callback: types.CallbackQuery, callback_data: CitiesCB, state: FSMContext):
     """
-        This handler works if city name entered by user occurs several times and user chose one
+    This handler works if city name entered by user occurs several times and user chose one
 
     :param callback:
     :param callback_data:
@@ -239,9 +240,13 @@ async def get_country_info(callback: types.CallbackQuery, state: FSMContext):
     :return: info about country
     """
     data = await state.get_data()
+    if not data['country_detail']:
+        return await callback.message.reply(
+            text=COUNTRY_UNAVAILABLE,
+            reply_markup=country_detail
+        )
     country_all_info = data['country_detail']
     text = get_country_info_text(country_all_info)
-
     return await callback.message.answer(
         text=text,
         reply_markup=country_detail,
@@ -262,6 +267,11 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
     :return: currency rate: national currency/ruble
     """
     data = await state.get_data()
+    if not data['country_detail']:
+        return await callback.message.answer(
+            text=CURRENCIES_UNAVAILABLE,
+            reply_markup=currency_detail
+        )
     async with CountryService() as uow:
         currencies = await uow.get_currency_rates(data['country_detail'].currencies)
     if not currencies:
@@ -270,7 +280,6 @@ async def get_currency_rate(callback: types.CallbackQuery, state: FSMContext):
             reply_markup=currency_detail,
         )
     text = get_currency_rate_text(currencies)
-
     return await callback.message.answer(
         text=text,
         reply_markup=currency_detail,

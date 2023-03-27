@@ -1,4 +1,7 @@
+import asyncio
 from dataclasses import dataclass
+
+from pydantic.error_wrappers import ValidationError
 
 from cache.cache_module import Cache
 from django_layer.countries_app.models import Country
@@ -46,7 +49,7 @@ class CountryService(AbstractUnitOfWork):
             await self.cache.set_country_geocoder(country_info)
         return country_info
 
-    async def get_country_all_info(self, country_info: GeocoderSchema) -> CountryUOWSchema:
+    async def get_country_all_info(self, country_info: GeocoderSchema) -> CountryUOWSchema | None:
         """
         Collects all information about country: country details, capital, languages, currecnies.
 
@@ -55,11 +58,15 @@ class CountryService(AbstractUnitOfWork):
         :return: all information about country as :class:`CountryUOWSchema` object
         """
         detail = await self.get_country(country_info)
-        languages = await self.get_languages(country_info)
-        currencies = await self.get_currencies(country_info)
-        capital = await self.get_capital_info(country_info)
-        return CountryUOWSchema(
-            detail=detail, languages=languages, currencies=currencies, capital=capital)
+        languages_task = asyncio.create_task(self.get_languages(country_info))
+        currencies_task = asyncio.create_task(self.get_currencies(country_info))
+        capital_task = asyncio.create_task(self.get_capital_info(country_info))
+        languages, currencies, capital = await asyncio.gather(languages_task, currencies_task, capital_task)
+        try:
+            return CountryUOWSchema(
+                detail=detail, languages=languages, currencies=currencies, capital=capital)
+        except ValidationError:
+            return None
 
     async def get_country(self, country_info: GeocoderSchema) -> CountrySchema | Country | None:
         """
